@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useAuth } from '@/lib/context';
 import { FileText, ClipboardList, Globe, Bell } from 'lucide-react';
 
@@ -26,9 +27,10 @@ export default function StudentDashboard() {
             <p className="text-slate-700 mb-4">
               Report a campus issue and help us improve the student experience.
             </p>
-            <a href="/student/submit-issue" className="text-blue-600 hover:text-blue-700 font-semibold">
-              Start reporting →
-            </a>
+          
+            <Link href="/student/submit-issue" className="text-blue-600 hover:text-blue-700 font-semibold">
+                   Start reporting →
+           </Link>
           </div>
 
           {/* My Issues Card */}
@@ -40,9 +42,9 @@ export default function StudentDashboard() {
             <p className="text-slate-700 mb-4">
               Track the status of issues you&apos;ve submitted and manage them.
             </p>
-            <a href="/student/my-issues" className="text-blue-600 hover:text-blue-700 font-semibold">
-              View my issues →
-            </a>
+            <Link href="/student/my-issues" className="text-blue-600 hover:text-blue-700 font-semibold">
+                   View my issues →
+           </Link>
           </div>
 
           {/* All Issues Card */}
@@ -54,9 +56,9 @@ export default function StudentDashboard() {
             <p className="text-slate-700 mb-4">
               View campus-wide issues from all students and show your support.
             </p>
-            <a href="/student/all-issues" className="text-blue-600 hover:text-blue-700 font-semibold">
-              Explore issues →
-            </a>
+            <Link href="/student/all-issues" className="text-blue-600 hover:text-blue-700 font-semibold">
+                   Explore all issues →
+           </Link>
           </div>
 
           {/* Notifications Card */}
@@ -68,9 +70,9 @@ export default function StudentDashboard() {
             <p className="text-slate-700 mb-4">
               Stay updated on your issues and get staff replies in real-time.
             </p>
-            <a href="/student/notifications" className="text-blue-600 hover:text-blue-700 font-semibold">
-              Check notifications →
-            </a>
+            <Link href="/student/notifications" className="text-blue-600 hover:text-blue-700 font-semibold">
+                   check out notifications →
+           </Link>
           </div>
         </div>
       </div>

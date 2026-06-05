@@ -27,13 +27,11 @@ export default function StaffIssueDetailPage() {
   if (!issue) {
     return (
       <div className="max-w-4xl">
-        <button
-          onClick={() => router.back()}
-          className="mb-6 flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
+        
+        <Link href="/staff/issues" className="text-blue-600 hover:text-blue-700 font-semibold">
+        <ArrowLeft className="w-4 h-4" />
+          Back to issues
+        </Link>
         <div className="bg-white rounded-lg shadow border border-slate-200 p-8 text-center">
           <p className="text-slate-600">Issue not found</p>
         </div>
@@ -82,6 +80,34 @@ export default function StaffIssueDetailPage() {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Student Information - Right Column */}
+        <div>
+          <div className="bg-white rounded-lg shadow border border-slate-200 p-6">
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Student Information</h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-slate-600">Name</p>
+                <p className="text-sm font-semibold text-slate-900">{issue.studentName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-600">Student ID</p>
+                <p className="text-sm font-semibold text-slate-900">{issue.studentId}</p>
+              </div>
+              <div className="pt-4 border-t border-slate-200">
+                <p className="text-sm text-slate-600 mb-2">Status</p>
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                    statusColors[issue.status]
+                  }`}
+                >
+                  {issue.status}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>  
+        
         {/* Issue Details - Left Column */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow border border-slate-200 p-8 mb-6">
@@ -170,32 +196,7 @@ export default function StaffIssueDetailPage() {
           </div>
         </div>
 
-        {/* Student Information - Right Column */}
-        <div>
-          <div className="bg-white rounded-lg shadow border border-slate-200 p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Student Information</h2>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-slate-600">Name</p>
-                <p className="text-sm font-semibold text-slate-900">{issue.studentName}</p>
-              </div>
-              <div>
-                <p className="text-sm text-slate-600">Student ID</p>
-                <p className="text-sm font-semibold text-slate-900">{issue.studentId}</p>
-              </div>
-              <div className="pt-4 border-t border-slate-200">
-                <p className="text-sm text-slate-600 mb-2">Status</p>
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                    statusColors[issue.status]
-                  }`}
-                >
-                  {issue.status}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   );

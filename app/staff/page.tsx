@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useAuth, useIssue } from '@/lib/context';
 import { ClipboardList, Clock, LoaderCircle , FolderOpen, BarChart2 } from 'lucide-react';
 
@@ -69,24 +70,11 @@ export default function StaffDashboard() {
             <p className="text-slate-700 mb-4">
               View all submitted issues and provide responses to students.
             </p>
-            <a href="/staff/issues" className="text-blue-600 hover:text-blue-700 font-semibold">
-              Go to issues →
-            </a>
+            <Link href="/staff/issues" className="text-blue-600 hover:text-blue-700 font-semibold">
+                   Go to issues →
+           </Link>
           </div>
 
-          {/* Statistics Card */}
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-6 border border-slate-200">
-            <div className="mb-3">
-              <BarChart2 className="w-8 h-8 text-slate-500" />
-            </div>
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">Quick Stats</h2>
-            <p className="text-slate-700 mb-4">
-              {pendingIssues} issues are waiting for your response. Keep up the good work!
-            </p>
-            <a href="/staff/issues" className="text-blue-600 hover:text-blue-700 font-semibold">
-              View pending →
-            </a>
-          </div>
         </div>
       </div>
     </div>
