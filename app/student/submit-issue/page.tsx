@@ -28,7 +28,7 @@ export default function SubmitIssuePage() {
   };
 
   const handleCancel = () => {
-    router.back();
+    router.push('/student');
   };
 
   return (
