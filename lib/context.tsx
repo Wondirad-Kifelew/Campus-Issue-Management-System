@@ -10,7 +10,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+ 
   const login = useCallback(async (userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
     // Mock authentication
     if (userId && password.length >= 6) {
@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role: role,
             registeredDate: new Date().toISOString().split('T')[0],
           };
+          
         }
       } else if (role === 'admin') {
         // Admin user
@@ -111,6 +112,8 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     };
     setIssues((prev) => [newIssue, ...prev]);
   }, []);
+  // console.log("issues in context", issues);
+// console.log("newly added issue", issues[issues.length - 1], "agreed by for the newly added issue", issues[issues.length - 1]?.agreedBy  );
 
   const updateIssue = useCallback((id: string, updates: Partial<Issue>) => {
     setIssues((prev) =>

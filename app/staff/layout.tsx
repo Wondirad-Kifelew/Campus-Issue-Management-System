@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { Sidebar } from '@/components/staff/Sidebar';
 import { Header } from '@/components/staff/Header';
 
@@ -11,15 +11,26 @@ export default function StaffLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // if (!isAuthenticated) {
+  //   router.push('/login');
+  //   return null;
+  // }
+
+  // if (user?.role !== 'staff') {
+  //   router.push('/student/dashboard');
+  //   return null;
+  // }
+useEffect(() => {
   if (!isAuthenticated) {
     router.push('/login');
-    return null;
+  } else if (user?.role !== 'staff') {
+    router.push('/student');
   }
+}, [isAuthenticated, user, router]);
 
-  if (user?.role !== 'staff') {
-    router.push('/student/dashboard');
-    return null;
-  }
+if (!isAuthenticated || user?.role !== 'staff') {
+  return null;
+}
 
   return (
     <div className="flex h-screen bg-slate-50">

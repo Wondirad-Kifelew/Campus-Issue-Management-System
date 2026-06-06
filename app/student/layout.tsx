@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { Sidebar } from '@/components/student/Sidebar';
 import { Header } from '@/components/student/Header';
 import { Menu, X } from 'lucide-react';
@@ -12,11 +12,20 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // if (!isAuthenticated) {
+  //   router.push('/login');
+  //   return null;
+  // }
+
+  useEffect(() => {
   if (!isAuthenticated) {
     router.push('/login');
-    return null;
   }
+}, [isAuthenticated, router]);
 
+if (!isAuthenticated) {
+  return null;
+}
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Mobile Sidebar Overlay */}
