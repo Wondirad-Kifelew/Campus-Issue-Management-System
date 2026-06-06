@@ -8,8 +8,18 @@ import { mockIssues, mockNotifications, mockStaff } from './mock-data';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+ const [user, setUser] = useState<User | null>(() => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const saved = sessionStorage.getItem('aau_user');
+    return saved ? JSON.parse(saved) : null;
+  } catch { return null; }
+});
+
+const [isAuthenticated, setIsAuthenticated] = useState(() => {
+  if (typeof window === 'undefined') return false;
+  return !!sessionStorage.getItem('aau_user');
+});
  
   const login = useCallback(async (userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
     // Mock authentication
@@ -52,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
       
+      sessionStorage.setItem('aau_user', JSON.stringify(newUser));
       setUser(newUser);
       setIsAuthenticated(true);
     } else {
@@ -69,6 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: role,
         registeredDate: new Date().toISOString().split('T')[0],
       };
+
+      sessionStorage.setItem('aau_user', JSON.stringify(newUser));
       setUser(newUser);
       setIsAuthenticated(true);
     } else {
@@ -78,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     setUser(null);
+    sessionStorage.removeItem('aau_user');
     setIsAuthenticated(false);
   }, []);
 

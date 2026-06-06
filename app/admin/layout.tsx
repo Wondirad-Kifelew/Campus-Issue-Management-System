@@ -11,26 +11,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // if (!isAuthenticated) {
-  //   router.push('/login');
-  //   return null;
-  // }
+const [mounted, setMounted] = useState(false);
 
-  // if (user?.role !== 'admin') {
-  //   router.push('/student/dashboard');
-  //   return null;
-  // }
-useEffect(() => {
-  if (!isAuthenticated) {
-    router.push('/login');
-  } else if (user?.role !== 'admin') {
-    router.push('/student');
-  }
-}, [isAuthenticated, user, router]);
 
-if (!isAuthenticated || user?.role !== 'admin') {
-  return null;
-}
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (!isAuthenticated) {
+      router.push('/');
+    } else if (user?.role !== 'admin') { // change per layout
+      router.push('/');
+    }
+  }, [isAuthenticated, user, router, mounted]);
+
+  if (!mounted || !isAuthenticated || user?.role !== 'admin') return null;
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Mobile Sidebar Overlay */}

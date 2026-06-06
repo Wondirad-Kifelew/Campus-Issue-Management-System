@@ -10,28 +10,21 @@ export default function StaffLayout({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // if (!isAuthenticated) {
-  //   router.push('/login');
-  //   return null;
-  // }
 
-  // if (user?.role !== 'staff') {
-  //   router.push('/student/dashboard');
-  //   return null;
-  // }
-useEffect(() => {
-  if (!isAuthenticated) {
-    router.push('/login');
-  } else if (user?.role !== 'staff') {
-    router.push('/student');
-  }
-}, [isAuthenticated, user, router]);
+  useEffect(() => { setMounted(true); }, []);
 
-if (!isAuthenticated || user?.role !== 'staff') {
-  return null;
-}
+  useEffect(() => {
+    if (!mounted) return;
+    if (!isAuthenticated) {
+      router.push('/');
+    } else if (user?.role !== 'staff') { // change per layout
+      router.push('/');
+    }
+  }, [isAuthenticated, user, router, mounted]);
 
+  if (!mounted || !isAuthenticated || user?.role !== 'staff') return null;
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Mobile Sidebar Overlay */}

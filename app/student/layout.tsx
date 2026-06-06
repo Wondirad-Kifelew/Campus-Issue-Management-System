@@ -8,24 +8,24 @@ import { Header } from '@/components/student/Header';
 import { Menu, X } from 'lucide-react';
 
 export default function StudentLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated,user } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // if (!isAuthenticated) {
-  //   router.push('/login');
-  //   return null;
-  // }
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-  if (!isAuthenticated) {
-    router.push('/login');
-  }
-}, [isAuthenticated, router]);
+    if (!mounted) return;
+    if (!isAuthenticated) {
+      router.push('/');
+    } else if (user?.role !== 'student') { // change per layout
+      router.push('/');
+    }
+  }, [isAuthenticated, user, router, mounted]);
 
-if (!isAuthenticated) {
-  return null;
-}
+  if (!mounted || !isAuthenticated || user?.role !== 'student') return null;
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Mobile Sidebar Overlay */}
