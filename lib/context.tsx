@@ -126,9 +126,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     };
     setIssues((prev) => [newIssue, ...prev]);
   }, []);
-  // console.log("issues in context", issues);
-// console.log("newly added issue", issues[issues.length - 1], "agreed by for the newly added issue", issues[issues.length - 1]?.agreedBy  );
-
+  
   const updateIssue = useCallback((id: string, updates: Partial<Issue>) => {
     setIssues((prev) =>
       prev.map((issue) => (issue.id === id ? { ...issue, ...updates } : issue))
