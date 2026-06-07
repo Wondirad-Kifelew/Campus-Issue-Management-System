@@ -18,9 +18,10 @@ const CATEGORIES: IssueCategory[] = [
 const ITEMS_PER_PAGE = 6;
 
 export default function AllIssuesPage() {
-  const { user } = useIssue();
+  // const { user } = useIssue();
   const { issues, agreeWithIssue } = useIssue();
   const authUser = useAuth().user;
+
   const [selectedCategory, setSelectedCategory] = useState<IssueCategory | 'All'>('All');
   const [sortBy, setSortBy] = useState<'newest' | 'most-agreed'>('newest');
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,12 +63,15 @@ export default function AllIssuesPage() {
   };
 
   const agreedIssueIds = issues
-    .filter((issue) => issue.agreedBy.includes(authUser?.id || ''))
+    .filter((issue) => issue?.agreedBy.includes(authUser?.userId || ''))
     .map((issue) => issue.id);
 
-  const handleAgree = (issueId: string) => {
-    if (authUser?.id) {
-      agreeWithIssue(issueId, authUser.id);
+  // [INTEGRATED] Call API to toggle agreement
+  const handleAgree = async (issueId: string) => {
+    console.log('Handling agree for issue(inhandleAgree):', issueId, 'by user:', authUser?.userId);
+    if (authUser?.userId) {
+      await agreeWithIssue(issueId, authUser.userId);
+      window.location.reload();
     }
   };
 

@@ -2,9 +2,10 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth, useIssue } from '@/lib/context';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner'; // [INTEGRATED] Toast notifications for feedback
 
 const statusColors = {
   Pending: 'bg-orange-100 text-orange-700',
@@ -24,6 +25,13 @@ export default function StaffIssueDetailPage() {
   const [newStatus, setNewStatus] = useState(issue?.status || 'Pending');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // [INTEGRATED] Sync newStatus when issue updates from API
+  useEffect(() => {
+    if (issue) {
+      setNewStatus(issue.status);
+    }
+  }, [issue?.status]);
+
   if (!issue) {
     return (
       <div className="max-w-4xl">
@@ -39,30 +47,31 @@ export default function StaffIssueDetailPage() {
     );
   }
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // [INTEGRATED] Call API to update status
+  const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const status = e.target.value as 'Pending' | 'In Progress' | 'Resolved';
     setNewStatus(status);
-    updateStatus(issueId, status);
+    await updateStatus(issueId, status);
   };
 
+  // [INTEGRATED] Call API to add response with error handling
   const handleSubmitResponse = async () => {
     if (!responseText.trim()) {
-      alert('Please enter a response');
+      toast.error('Please enter a response');
       return;
     }
 
     if (!user) {
-      alert('User not authenticated');
+      toast.error('User not authenticated');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      addResponse(issueId, user.id, user.name, responseText);
+      await addResponse(issueId, user.id, user.name, responseText);
       setResponseText('');
     } catch (error) {
-      console.error('Error adding response:', error);
-      alert('Failed to add response');
+      console.error('[v0] Error adding response:', error);
     } finally {
       setIsSubmitting(false);
     }

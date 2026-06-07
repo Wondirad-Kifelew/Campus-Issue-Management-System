@@ -12,9 +12,10 @@ export default function NotificationsPage() {
     null
   );
 
-  const handleViewReply = (notification: Notification) => {
+  // [INTEGRATED] Call API to mark notification as read
+  const handleViewReply = async (notification: Notification) => {
     setSelectedNotification(notification);
-    markNotificationAsRead(notification.id);
+    await markNotificationAsRead(notification.id);
   };
 
   return (

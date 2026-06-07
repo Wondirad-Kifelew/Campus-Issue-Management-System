@@ -9,13 +9,18 @@ const URGENCY_THRESHOLD = 10; // BR-5: auto-elevate priority
 type Params = { params: { id: string } };
 
 // POST /api/issues/:id/agree  — students only (FR9 / BR-4)
-export async function POST(request: NextRequest, { params }: Params) {
+export async function POST(request: NextRequest, context:any) {
+  const params = await context.params;
+  const id = params.id;
+  console.log('id from context:', id);
+ 
   const auth = enforceRole(request, ['student']);
   if (auth instanceof NextResponse) return auth;
 
   await connectDB();
-
-  const issue = await Issue.findById(params.id);
+  console.log('Connected to DB, looking for issue with id:', id);
+  const issue = await Issue.findById(id);
+  console.log('Issue found:', issue, 'id:', id); // params.id is undefined
   if (!issue) {
     return NextResponse.json({ error: 'Issue not found' }, { status: 404 });
   }
@@ -36,10 +41,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   issue.isUrgent = issue.agreementCount >= URGENCY_THRESHOLD;
 
   await issue.save();
-
   return NextResponse.json({
-    agreed:         !alreadyAgreed,
-    agreementCount: issue.agreementCount,
-    isUrgent:       issue.isUrgent,
+    issue
   });
 }

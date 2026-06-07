@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useIssue } from '@/lib/context';
 import { IssueForm } from '@/components/student/IssueForm';
@@ -9,22 +10,30 @@ export default function SubmitIssuePage() {
   const router = useRouter();
   const { user } = useAuth();
   const { addIssue } = useIssue();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (data: {
+  // [INTEGRATED] Call API to submit issue and redirect on success
+  const handleSubmit = async (data: {
     title: string;
     description: string;
     category: IssueCategory;
   }) => {
-    addIssue({
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      status: 'Pending',
-      studentId: user?.id || '',
-      studentName: user?.name || 'Anonymous',
-      submittedDate: new Date().toISOString().split('T')[0],
-    });
-    router.push('/student/my-issues');
+    setIsLoading(true);
+    try {
+      await addIssue({
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        status: 'Pending',
+        studentId: user?.id || '',
+        studentName: user?.name || 'Anonymous',
+        submittedDate: new Date().toISOString().split('T')[0],
+      });
+      // Only redirect after successful API call
+      router.push('/student/my-issues');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -41,7 +50,7 @@ export default function SubmitIssuePage() {
       </div>
 
       <div className="bg-white rounded-lg shadow border border-slate-200 p-8">
-        <IssueForm onSubmit={handleSubmit} onCancel={handleCancel} />
+        <IssueForm onSubmit={handleSubmit} onCancel={handleCancel} isLoading={isLoading} />
       </div>
     </div>
   );

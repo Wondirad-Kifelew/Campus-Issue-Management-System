@@ -1,13 +1,18 @@
+import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+dotenv.config();
 
-if (!MONGODB_URI) {
-  throw new Error(
-    'MONGODB_URI is not defined. Please add it to your .env.local file.'
-  );
+// [INTEGRATED] Get MONGODB_URI at runtime instead of build time to support env vars
+function getMongoDBURI(): string {
+  console.log('MongoDB URI:', process.env.MONGODB_URI); // Debug log to check the value of MONGODB_URI
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('MONGODB_URI is not defined. Please add it to your environment variables.');
+  }
+  return uri;
 }
-
+ 
 // Cache the connection across hot reloads in development
 // This prevents creating a new connection on every API call
 declare global {
@@ -29,8 +34,9 @@ export async function connectDB(): Promise<mongoose.Connection> {
   }
 
   if (!cached.promise) {
+    // [INTEGRATED] Use getMongoDBURI() to get URI at runtime
     cached.promise = mongoose
-      .connect(MONGODB_URI as string, {
+      .connect(getMongoDBURI(), {
         bufferCommands: false,
       })
       .then((m) => m.connection);

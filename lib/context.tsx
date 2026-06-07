@@ -1,103 +1,102 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { User, Issue, Notification, AuthContextType, IssueContextType } from './types';
-import { mockIssues, mockNotifications, mockStaff } from './mock-data';
+import { toast } from 'sonner'; // [INTEGRATED] Toast notifications for API operations
 
 // Auth Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
- const [user, setUser] = useState<User | null>(() => {
-  if (typeof window === 'undefined') return null;
-  try {
-    const saved = sessionStorage.getItem('aau_user');
-    return saved ? JSON.parse(saved) : null;
-  } catch { return null; }
-});
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-const [isAuthenticated, setIsAuthenticated] = useState(() => {
-  if (typeof window === 'undefined') return false;
-  return !!sessionStorage.getItem('aau_user');
-});
- 
-  const login = useCallback(async (userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
-    // Mock authentication
-    if (userId && password.length >= 6) {
-      let newUser: User;
-      
-      // If staff, try to find matching staff in mock data
-      if (role === 'staff') {
-        const staffMember = mockStaff.find(s => s.userId === userId);
-        if (staffMember) {
-          newUser = staffMember;
-        } else {
-          // Create new staff user without category if not found
-          newUser = {
-            id: `user_${Date.now()}`,
-            name: 'Staff Member',
-            userId: userId,
-            role: role,
-            registeredDate: new Date().toISOString().split('T')[0],
-          };
-          
+  // [INTEGRATED] Check if user session exists on mount via JWT cookie
+  // The API sets httpOnly cookies that persist across page refreshes
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data.user);
+          setIsAuthenticated(true);
         }
-      } else if (role === 'admin') {
-        // Admin user
-        newUser = {
-          id: `user_${Date.now()}`,
-          name: 'Ayalu Sisay',
-          userId: userId,
-          role: role,
-          registeredDate: new Date().toISOString().split('T')[0],
-        };
-      } else {
-        // Student user
-        newUser = {
-          id: `user_${Date.now()}`,
-          name: 'Meoza Sisay', // Default mock user
-          userId: userId,
-          role: role,
-          registeredDate: new Date().toISOString().split('T')[0],
-        };
+      } catch (error) {
+        console.error('[v0] Auth check failed:', error);
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
-      
-      sessionStorage.setItem('aau_user', JSON.stringify(newUser));
-      setUser(newUser);
-      setIsAuthenticated(true);
-    } else {
-      throw new Error('Invalid credentials');
-    }
+    };
+
+    checkAuth();
   }, []);
 
+  // [INTEGRATED] Call /api/auth/login instead of mock authentication
+  const login = useCallback(async (userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, password, role }),
+      credentials: 'include', // Send cookies
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Login failed');
+    }
+
+    const data = await response.json();
+    setUser(data.user);
+    setIsAuthenticated(true);
+  }, []);
+
+  // [INTEGRATED] Call /api/auth/register instead of mock registration
   const register = useCallback(async (name: string, userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
-    // Mock registration
-    if (name && userId && password.length >= 6) {
-      const newUser: User = {
-        id: `user_${Date.now()}`,
-        name: name,
-        userId: userId,
-        role: role,
-        registeredDate: new Date().toISOString().split('T')[0],
-      };
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, userId, password, role }),
+      credentials: 'include', // Send cookies
+    });
 
-      sessionStorage.setItem('aau_user', JSON.stringify(newUser));
-      setUser(newUser);
-      setIsAuthenticated(true);
-    } else {
-      throw new Error('Invalid registration data');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Registration failed');
     }
+
+    const data = await response.json();
+    setUser(data.user);
+    setIsAuthenticated(true);
   }, []);
 
-  const logout = useCallback(() => {
+  // [INTEGRATED] Call /api/auth/logout to clear session
+  const logout = useCallback(async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('[v0] Logout error:', error);
+    }
     setUser(null);
-    sessionStorage.removeItem('aau_user');
     setIsAuthenticated(false);
   }, []);
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
-      {children}
+      {/* Show loading state while checking session - prevents flash of login page */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
@@ -113,87 +112,250 @@ export function useAuth() {
 // Issue Context
 const IssueContext = createContext<IssueContextType | undefined>(undefined);
 
-export function IssueProvider({ children }: { children: ReactNode }) {
-  const [issues, setIssues] = useState<Issue[]>(mockIssues);
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-
-  const addIssue = useCallback((issue: Omit<Issue, 'id' | 'agreementCount' | 'agreedBy'>) => {
-    const newIssue: Issue = {
-      ...issue,
-      id: `issue_${Date.now()}`,
-      agreementCount: 0,
-      agreedBy: [],
-    };
-    setIssues((prev) => [newIssue, ...prev]);
-  }, []);
+const normalizeIssue = (issue: any) => {
+  // If already normalized (has id, no _id), return as-is
+  if (issue.id && !issue._id) return issue;
   
-  const updateIssue = useCallback((id: string, updates: Partial<Issue>) => {
-    setIssues((prev) =>
-      prev.map((issue) => (issue.id === id ? { ...issue, ...updates } : issue))
-    );
-  }, []);
+  const { _id, ...rest } = issue;
+  return {
+    ...rest,
+    id: _id?.toString() ?? issue.id,
+  };
+};
 
-  const deleteIssue = useCallback((id: string) => {
-    setIssues((prev) => prev.filter((issue) => issue.id !== id));
-  }, []);
+export function IssueProvider({ children }: { children: ReactNode }) {
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoadingIssues, setIsLoadingIssues] = useState(false);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
 
-  const agreeWithIssue = useCallback((issueId: string, studentId: string) => {
-    setIssues((prev) =>
-      prev.map((issue) => {
-        if (issue.id === issueId) {
-          const isAlreadyAgreed = issue.agreedBy.includes(studentId);
-          return {
-            ...issue,
-            agreementCount: isAlreadyAgreed
-              ? Math.max(0, issue.agreementCount - 1)
-              : issue.agreementCount + 1,
-            agreedBy: isAlreadyAgreed
-              ? issue.agreedBy.filter((id) => id !== studentId)
-              : [...issue.agreedBy, studentId],
-          };
+  // [INTEGRATED] Fetch issues from API on mount
+  useEffect(() => {
+    const fetchIssues = async () => {
+      setIsLoadingIssues(true);
+      try {
+        const response = await fetch('/api/issues', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+            // normalize _id to id for frontend consistency
+
+            const normalized = data.issues.map(normalizeIssue);
+          setIssues(normalized || []);
+          
+        } else {  
+          console.error('[v0] Failed to fetch issues:', response.statusText);
+          setIssues([]);
         }
-        return issue;
-      })
-    );
+      } catch (error) {
+        console.error('[v0] Error fetching issues:', error);
+        setIssues([]);
+      } finally {
+        setIsLoadingIssues(false);
+      }
+    };
+
+    fetchIssues();
   }, []);
 
-  const markNotificationAsRead = useCallback((notificationId: string) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === notificationId ? { ...notif, read: true } : notif
-      )
-    );
+  // [INTEGRATED] Fetch notifications from API on mount
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setIsLoadingNotifications(true);
+      try {
+        const response = await fetch('/api/notifications', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          setNotifications(data.notifications || []);
+        } else {
+          console.error('[v0] Failed to fetch notifications:', response.statusText);
+          setNotifications([]);
+        }
+      } catch (error) {
+        console.error('[v0] Error fetching notifications:', error);
+        setNotifications([]);
+      } finally {
+        setIsLoadingNotifications(false);
+      }
+    };
+
+    fetchNotifications();
   }, []);
 
-  const updateStatus = useCallback((issueId: string, status: string) => {
-    setIssues((prev) =>
-      prev.map((issue) => (issue.id === issueId ? { ...issue, status: status as any } : issue))
-    );
+  // [INTEGRATED] Call /api/issues POST to create new issue
+  const addIssue = useCallback(async (issue: Omit<Issue, 'id' | 'agreementCount' | 'agreedBy'>) => {
+    try {
+      const response = await fetch('/api/issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: issue.title,
+          description: issue.description,
+          category: issue.category,
+        }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit issue');
+      }
+
+      const data = await response.json();
+      setIssues((prev) => [normalizeIssue(data.issue), ...prev]);
+      toast.success('Issue submitted successfully!');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to submit issue';
+      toast.error(errorMsg);
+      console.error('[v0] Error adding issue:', error);
+    }
   }, []);
 
-  const addResponse = useCallback(
-    (issueId: string, staffId: string, staffName: string, response: string) => {
+  // [INTEGRATED] Call /api/issues/:id PUT to update issue
+  const updateIssue = useCallback(async (id: string, updates: Partial<Issue>) => {
+    try {
+      const response = await fetch(`/api/issues/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update issue');
+      }
+
+      const data = await response.json();
       setIssues((prev) =>
-        prev.map((issue) => {
-          if (issue.id === issueId) {
-            const newResponse = {
-              id: `response_${Date.now()}`,
-              staffId,
-              staffName,
-              response,
-              timestamp: new Date().toISOString(),
-            };
-            return {
-              ...issue,
-              responses: [...(issue.responses || []), newResponse],
-            };
-          }
-          return issue;
-        })
+        prev.map((issue) => (issue.id === id ? normalizeIssue(data.issue) : issue))
       );
-    },
-    []
-  );
+    } catch (error) {
+      console.error('[v0] Error updating issue:', error);
+      toast.error('Failed to update issue');
+    }
+  }, []);
+
+  // [INTEGRATED] Call /api/issues/:id DELETE to delete issue
+  const deleteIssue = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`/api/issues/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete issue');
+      }
+
+      setIssues((prev) => prev.filter((issue) => issue.id !== id));
+      toast.success('Issue deleted successfully');
+    } catch (error) {
+      console.error('[v0] Error deleting issue:', error);
+      toast.error('Failed to delete issue');
+    }
+  }, []);
+
+  // [INTEGRATED] Call /api/issues/:id/agree to toggle agreement
+  const agreeWithIssue = useCallback(async (issueId: string, studentId: string) => {
+    try {
+      console.log('Agreeing with issue:(inContext)', issueId, 'by student:', studentId);
+      const response = await fetch(`/api/issues/${issueId}/agree`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId }),
+        credentials: 'include',
+      });
+      console.log('API response for agree:(in context)', response);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to agree with issue');
+      }
+
+      const data = await response.json();
+      console.log('Data from agree API:(in context)', data);
+      // console.log('Normalized issue after agree:(in context)', normalizeIssue(data.issue));
+      setIssues((prev) =>
+        prev.map((issue) => (issue.id === issueId ? data.issue : issue))
+      );
+    } catch (error) {
+      console.error('[v0] Error agreeing with issue:(in context)', error);
+      toast.error('Failed to update agreement');
+    }
+  }, []);
+
+  // [INTEGRATED] Call /api/notifications/:id to mark as read
+  const markNotificationAsRead = useCallback(async (notificationId: string) => {
+    try {
+      const response = await fetch(`/api/notifications/${notificationId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ read: true }),
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        setNotifications((prev) =>
+          prev.map((notif) =>
+            notif.id === notificationId ? { ...notif, read: true } : notif
+          )
+        );
+      }
+    } catch (error) {
+      console.error('[v0] Error marking notification as read:', error);
+    }
+  }, []);
+
+  // [INTEGRATED] Call /api/issues/:id to update status
+  const updateStatus = useCallback(async (issueId: string, status: string) => {
+    try {
+      const response = await fetch(`/api/issues/${issueId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+
+      const data = await response.json();
+      setIssues((prev) =>
+        prev.map((issue) => (issue.id === issueId ? normalizeIssue(data.issue) : issue))
+      );
+      toast.success('Status updated successfully');
+    } catch (error) {
+      console.error('[v0] Error updating status:', error);
+      toast.error('Failed to update status');
+    }
+  }, []);
+
+  // [INTEGRATED] Call /api/issues/:id/respond to add response
+  const addResponse = useCallback(async (issueId: string, staffId: string, staffName: string, response: string) => {
+    try {
+      const res = await fetch(`/api/issues/${issueId}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ response }),
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to add response');
+      }
+
+      const data = await res.json();
+      setIssues((prev) =>
+        prev.map((issue) => (issue.id === issueId ? normalizeIssue(data.issue) : issue))
+      );
+      toast.success('Response added successfully');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to add response';
+      console.error('[v0] Error adding response:', error);
+      toast.error(errorMsg);
+    }
+  }, []);
 
   return (
     <IssueContext.Provider
@@ -209,7 +371,14 @@ export function IssueProvider({ children }: { children: ReactNode }) {
         addResponse,
       }}
     >
-      {children}
+      {/* Show loading spinner while fetching initial data */}
+      {isLoadingIssues && isLoadingNotifications ? (
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      ) : (
+        children
+      )}
     </IssueContext.Provider>
   );
 }
