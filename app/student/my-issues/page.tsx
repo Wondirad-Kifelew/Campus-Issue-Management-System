@@ -6,6 +6,7 @@ import { Issue } from '@/lib/types';
 import { IssueList } from '@/components/student/IssueList';
 import { EditIssueModal } from '@/components/student/EditIssueModal';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner'; // [INTEGRATED] Toast notifications for feedback
 
 const ITEMS_PER_PAGE = 5;
 
@@ -24,15 +25,19 @@ export default function MyIssuesPage() {
     setEditingIssue(issue);
   };
 
-  const handleSaveEdit = (updates: Partial<Issue>) => {
+  // [INTEGRATED] Call API to update issue
+  const handleSaveEdit = async (updates: Partial<Issue>) => {
     if (editingIssue) {
-      updateIssue(editingIssue.id, updates);
+      await updateIssue(editingIssue.id, updates);
       setEditingIssue(null);
     }
   };
 
-  const handleDelete = (issueId: string) => {
-    deleteIssue(issueId);
+  // [INTEGRATED] Call API to delete issue with confirmation
+  const handleDelete = async (issueId: string) => {
+    if (window.confirm('Are you sure you want to delete this issue?')) {
+      await deleteIssue(issueId);
+    }
   };
 
   const handlePreviousPage = () => {

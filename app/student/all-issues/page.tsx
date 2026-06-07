@@ -65,9 +65,10 @@ export default function AllIssuesPage() {
     .filter((issue) => issue.agreedBy.includes(authUser?.id || ''))
     .map((issue) => issue.id);
 
-  const handleAgree = (issueId: string) => {
+  // [INTEGRATED] Call API to toggle agreement
+  const handleAgree = async (issueId: string) => {
     if (authUser?.id) {
-      agreeWithIssue(issueId, authUser.id);
+      await agreeWithIssue(issueId, authUser.id);
     }
   };
 
