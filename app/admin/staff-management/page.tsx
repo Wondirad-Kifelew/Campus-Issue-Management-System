@@ -174,7 +174,7 @@ export default function StaffManagement() {
 
       {/* Edit Staff Member Modal */}
       {showEditForm && editingId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-slate-900 mb-6">Edit Staff Member</h3>
             
@@ -236,7 +236,7 @@ export default function StaffManagement() {
 
       {/* Add Staff Member Form */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-slate-900 mb-6">Add Staff Member</h3>
             

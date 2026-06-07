@@ -9,6 +9,7 @@ type Params = { params: { id: string } };
 
 // POST /api/issues/:id/respond  — staff only (FR13 / UC-009)
 export async function POST(request: NextRequest, { params }: Params) {
+  const {id} = await params; // Ensure params is destructured to avoid unused variable error
   const auth = enforceRole(request, ['staff']);
   if (auth instanceof NextResponse) return auth;
 
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   await connectDB();
 
-  const issue = await Issue.findById(params.id);
+  const issue = await Issue.findById(id);
   if (!issue) {
     return NextResponse.json({ error: 'Issue not found' }, { status: 404 });
   }

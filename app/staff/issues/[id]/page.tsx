@@ -19,8 +19,10 @@ export default function StaffIssueDetailPage() {
   const { user } = useAuth();
   const { issues, updateStatus, addResponse } = useIssue();
   const issueId = params.id as string;
-
-  const issue = issues.find((i) => i.id === issueId);
+console.log('issueId from params:', issueId); // Debugging log
+console.log('Issues from context:', issues); // Debugging log
+  const issue = issues.find((i) => i?.id === issueId);
+  console.log('Found issue:', issue); // Debugging log
   const [responseText, setResponseText] = useState('');
   const [newStatus, setNewStatus] = useState(issue?.status || 'Pending');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -160,8 +162,8 @@ export default function StaffIssueDetailPage() {
 
             {issue.responses && issue.responses.length > 0 ? (
               <div className="space-y-4 mb-6 pb-6 border-b border-slate-200">
-                {issue.responses.map((response) => (
-                  <div key={response.id} className="bg-slate-50 rounded-lg p-4">
+                {issue.responses.map((response, key) => (
+                  <div key={key} className="bg-slate-50 rounded-lg p-4">
                     <div className="flex items-start justify-between mb-2">
                       <p className="font-semibold text-slate-900">{response.staffName}</p>
                       <p className="text-xs text-slate-600">

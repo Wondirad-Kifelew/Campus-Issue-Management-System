@@ -21,7 +21,7 @@ export function Sidebar({ onClose }: SidebarProps) {
 
   const menuItems = [
     { href: '/staff', label: 'Dashboard', icon: LayoutDashboard },
-    { href: 'staff/issues', label: 'Issues', icon: ListTodo },
+    { href: '/staff/issues', label: 'Issues', icon: ListTodo },
   ];
 
   const handleLogout = () => {

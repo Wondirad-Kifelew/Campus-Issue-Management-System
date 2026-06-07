@@ -140,7 +140,7 @@ export default function StudentManagement() {
 
       {/* Add Student Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-slate-900 mb-6">Add Student</h3>
             
@@ -190,7 +190,7 @@ export default function StudentManagement() {
 
       {/* Edit Student Modal */}
       {editingId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-slate-900 mb-6">Edit Student</h3>
             

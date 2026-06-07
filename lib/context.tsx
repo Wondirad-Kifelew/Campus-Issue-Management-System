@@ -163,6 +163,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
       setIsLoadingNotifications(true);
       try {
         const response = await fetch('/api/notifications', { credentials: 'include' });
+        console.log('API response for notifications:(in context)', response);
         if (response.ok) {
           const data = await response.json();
           setNotifications(data.notifications || []);
@@ -313,12 +314,12 @@ export function IssueProvider({ children }: { children: ReactNode }) {
   const updateStatus = useCallback(async (issueId: string, status: string) => {
     try {
       const response = await fetch(`/api/issues/${issueId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
         credentials: 'include',
       });
-
+console.log('API response for status update:(in context)', response);
       if (!response.ok) {
         throw new Error('Failed to update status');
       }
@@ -351,7 +352,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
 
       const data = await res.json();
       setIssues((prev) =>
-        prev.map((issue) => (issue.id === issueId ? normalizeIssue(data.issue) : issue))
+        prev.map((issue) => (issue.id === issueId ? data.issue: issue))
       );
       toast.success('Response added successfully');
     } catch (error) {

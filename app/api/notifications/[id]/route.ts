@@ -8,12 +8,13 @@ type Params = { params: { id: string } };
 
 // PATCH /api/notifications/:id  — mark a notification as read
 export async function PATCH(request: NextRequest, { params }: Params) {
+  const {id} = await params; 
   const auth = enforceRole(request, ['student']);
   if (auth instanceof NextResponse) return auth;
 
   await connectDB();
 
-  const notification = await Notification.findById(params.id);
+  const notification = await Notification.findById(id);
 
   if (!notification) {
     return NextResponse.json({ error: 'Notification not found' }, { status: 404 });

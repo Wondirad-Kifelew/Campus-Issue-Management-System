@@ -7,11 +7,11 @@ import { enforceRole } from '@/lib/middleware/auth';
 // GET /api/notifications  — students only (FR10)
 // Returns notifications belonging to the authenticated student
 export async function GET(request: NextRequest) {
-  const auth = enforceRole(request, ['student']);
+  
+  const auth = enforceRole(request, ['staff']);
+  
   if (auth instanceof NextResponse) return auth;
-
   await connectDB();
-
   const notifications = await Notification.find({ recipientId: auth.userId })
     .sort({ createdAt: -1 })
     .lean();

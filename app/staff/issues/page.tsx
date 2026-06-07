@@ -153,40 +153,40 @@ export default function StaffIssuesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {paginatedIssues.map((issue) => (
-                    <tr key={issue.id} className="hover:bg-slate-50 transition-colors">
+                  {paginatedIssues.map((issue, key) => (
+                    <tr key={key} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4 text-sm text-slate-900">
                         <a
-                          href={`/staff/issues/${issue.id}`}
+                          href={`/staff/issues/${issue?.id}`}
                           className="hover:text-blue-600 cursor-pointer"
                         >
-                          {issue.title.length > 30 ? issue.title.substring(0, 30) + '...' : issue.title}
+                          {issue?.title.length > 30 ? issue?.title.substring(0, 30) + '...' : issue?.title}
                         </a>
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            categoryColors[issue.category]
+                            categoryColors[issue?.category]
                           }`}
                         >
-                          {issue.category}
+                          {issue?.category}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            statusColors[issue.status]
+                            statusColors[issue?.status]
                           }`}
                         >
-                          {issue.status}
+                          {issue?.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600">
-                        {issue.submittedDate}
+                        {issue?.submittedDate}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <Link
-                          href={`/staff/issues/${issue.id}`}
+                          href={`/staff/issues/${issue?.id}`}
                           className="inline-flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         >
                           <Eye className="w-4 h-4" />
