@@ -22,6 +22,7 @@ export interface JWTPayload {
 // Extracts and verifies the JWT from the request cookie
 export function verifyToken(request: NextRequest): JWTPayload | null {
   try {
+    // console.log('Verifying token for request:', request.url); // Debugging log
     const token = request.cookies.get('aau_token')?.value;
     if (!token) return null;
     // [INTEGRATED] Use getJWTSecret() to get secret at runtime

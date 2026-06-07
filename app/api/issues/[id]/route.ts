@@ -6,17 +6,21 @@ import Notification from '@/lib/models/Notification';
 import { enforceRole, verifyToken } from '@/lib/middleware/auth';
 import type { IssueCategory } from '@/lib/types';
 
-type Params = { params: { id: string } };
+// type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
-// GET /api/issues/:id  — any authenticated user
+
+// GET /api/issues/:id  — any authenticated users
 export async function GET(request: NextRequest, { params }: Params) {
+    const { id } = await params;
+
   const payload = verifyToken(request);
   if (!payload) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   await connectDB();
-  const issue = await Issue.findById(params.id).lean();
+  const issue = await Issue.findById(id).lean();
 
   if (!issue) {
     return NextResponse.json({ error: 'Issue not found' }, { status: 404 });
@@ -37,13 +41,16 @@ export async function GET(request: NextRequest, { params }: Params) {
 // - Staff:   update status (FR12)
 // - Admin:   unrestricted updates
 export async function PATCH(request: NextRequest, { params }: Params) {
+  
+  const { id } = await params;
   const payload = verifyToken(request);
   if (!payload) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   await connectDB();
-  const issue = await Issue.findById(params.id);
+ 
+  const issue = await Issue.findById(id);
 
   if (!issue) {
     return NextResponse.json({ error: 'Issue not found' }, { status: 404 });
@@ -121,13 +128,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
 // DELETE /api/issues/:id  — student (own + Pending only) or admin
 export async function DELETE(request: NextRequest, { params }: Params) {
+    const { id } = await params;
+
   const payload = verifyToken(request);
   if (!payload) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   await connectDB();
-  const issue = await Issue.findById(params.id);
+  const issue = await Issue.findById(id);
 
   if (!issue) {
     return NextResponse.json({ error: 'Issue not found' }, { status: 404 });

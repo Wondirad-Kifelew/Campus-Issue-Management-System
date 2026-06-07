@@ -16,7 +16,8 @@ export default function MyIssuesPage() {
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const myIssues = issues.filter((issue) => issue.studentId === user?.id);
+  const myIssues = issues.filter((issue) => issue.studentId === user?.userId);
+
   const totalPages = Math.ceil(myIssues.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedIssues = myIssues.slice(startIndex, startIndex + ITEMS_PER_PAGE);

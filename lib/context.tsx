@@ -214,15 +214,19 @@ export function IssueProvider({ children }: { children: ReactNode }) {
   const updateIssue = useCallback(async (id: string, updates: Partial<Issue>) => {
     try {
       const response = await fetch(`/api/issues/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
         credentials: 'include',
       });
-
+      
+       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update issue');
+        const text = await response.text();
+        console.log("Error response:", text);
+
+        throw new Error(text || "Failed to update issue");
+        // throw new Error(errorData.error || 'Failed to update issue');
       }
 
       const data = await response.json();
