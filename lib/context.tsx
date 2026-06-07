@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { User, Issue, Notification, AuthContextType, IssueContextType } from './types';
 import { toast } from 'sonner'; // [INTEGRATED] Toast notifications for API operations
+import { usePathname } from 'next/navigation';
 
 // Auth Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -128,6 +129,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoadingIssues, setIsLoadingIssues] = useState(false);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+  const pathname = usePathname(); 
 
   // [INTEGRATED] Fetch issues from API on mount
   useEffect(() => {
@@ -155,7 +157,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     };
 
     fetchIssues();
-  }, []);
+  }, [pathname]);
 
   // [INTEGRATED] Fetch notifications from API on mount
   useEffect(() => {
@@ -357,7 +359,7 @@ console.log('API response for status update:(in context)', response);
       toast.success('Response added successfully');
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to add response';
-      console.error('[v0] Error adding response:', error);
+      console.error('Error adding response:', error);
       toast.error(errorMsg);
     }
   }, []);

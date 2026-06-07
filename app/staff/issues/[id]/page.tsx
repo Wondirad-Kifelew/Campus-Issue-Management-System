@@ -18,11 +18,9 @@ export default function StaffIssueDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { issues, updateStatus, addResponse } = useIssue();
-  const issueId = params.id as string;
-console.log('issueId from params:', issueId); // Debugging log
-console.log('Issues from context:', issues); // Debugging log
+  const issueId = params.id as string;    
+  const [isLoading, setIsLoading] = useState(true);  // ← add this
   const issue = issues.find((i) => i?.id === issueId);
-  console.log('Found issue:', issue); // Debugging log
   const [responseText, setResponseText] = useState('');
   const [newStatus, setNewStatus] = useState(issue?.status || 'Pending');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,10 +68,11 @@ console.log('Issues from context:', issues); // Debugging log
 
     setIsSubmitting(true);
     try {
+      window.location.reload(); 
       await addResponse(issueId, user.id, user.name, responseText);
       setResponseText('');
     } catch (error) {
-      console.error('[v0] Error adding response:', error);
+      console.error(' Error adding response:', error);
     } finally {
       setIsSubmitting(false);
     }
