@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/lib/context';
 import { GraduationCap, Users, ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { toast } from 'sonner'; // [INTEGRATED] Toast notifications for feedback
 
 const roleConfig = {
   student: {
@@ -58,10 +59,18 @@ export function RegisterForm() {
         throw new Error('Password must be at least 6 characters');
       if (password !== confirmPassword)
         throw new Error('Passwords do not match');
+      
+      // [INTEGRATED] Call API register instead of mock - shows spinner during request
       await register(fullName, userId, password, role);
+      
+      // [INTEGRATED] Show success toast and redirect
+      toast.success('Account created successfully!');
       router.push(role === 'staff' ? '/staff' : '/student');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+      const errorMsg = err instanceof Error ? err.message : 'Registration failed';
+      setError(errorMsg);
+      // [INTEGRATED] Show error toast for API failures
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { User, Issue, Notification, AuthContextType, IssueContextType } from './types';
 import { mockIssues, mockNotifications, mockStaff } from './mock-data';
 
@@ -8,96 +8,95 @@ import { mockIssues, mockNotifications, mockStaff } from './mock-data';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
- const [user, setUser] = useState<User | null>(() => {
-  if (typeof window === 'undefined') return null;
-  try {
-    const saved = sessionStorage.getItem('aau_user');
-    return saved ? JSON.parse(saved) : null;
-  } catch { return null; }
-});
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-const [isAuthenticated, setIsAuthenticated] = useState(() => {
-  if (typeof window === 'undefined') return false;
-  return !!sessionStorage.getItem('aau_user');
-});
- 
-  const login = useCallback(async (userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
-    // Mock authentication
-    if (userId && password.length >= 6) {
-      let newUser: User;
-      
-      // If staff, try to find matching staff in mock data
-      if (role === 'staff') {
-        const staffMember = mockStaff.find(s => s.userId === userId);
-        if (staffMember) {
-          newUser = staffMember;
-        } else {
-          // Create new staff user without category if not found
-          newUser = {
-            id: `user_${Date.now()}`,
-            name: 'Staff Member',
-            userId: userId,
-            role: role,
-            registeredDate: new Date().toISOString().split('T')[0],
-          };
-          
+  // [INTEGRATED] Check if user session exists on mount via JWT cookie
+  // The API sets httpOnly cookies that persist across page refreshes
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data.user);
+          setIsAuthenticated(true);
         }
-      } else if (role === 'admin') {
-        // Admin user
-        newUser = {
-          id: `user_${Date.now()}`,
-          name: 'Ayalu Sisay',
-          userId: userId,
-          role: role,
-          registeredDate: new Date().toISOString().split('T')[0],
-        };
-      } else {
-        // Student user
-        newUser = {
-          id: `user_${Date.now()}`,
-          name: 'Meoza Sisay', // Default mock user
-          userId: userId,
-          role: role,
-          registeredDate: new Date().toISOString().split('T')[0],
-        };
+      } catch (error) {
+        console.error('[v0] Auth check failed:', error);
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
-      
-      sessionStorage.setItem('aau_user', JSON.stringify(newUser));
-      setUser(newUser);
-      setIsAuthenticated(true);
-    } else {
-      throw new Error('Invalid credentials');
-    }
+    };
+
+    checkAuth();
   }, []);
 
+  // [INTEGRATED] Call /api/auth/login instead of mock authentication
+  const login = useCallback(async (userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, password, role }),
+      credentials: 'include', // Send cookies
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Login failed');
+    }
+
+    const data = await response.json();
+    setUser(data.user);
+    setIsAuthenticated(true);
+  }, []);
+
+  // [INTEGRATED] Call /api/auth/register instead of mock registration
   const register = useCallback(async (name: string, userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
-    // Mock registration
-    if (name && userId && password.length >= 6) {
-      const newUser: User = {
-        id: `user_${Date.now()}`,
-        name: name,
-        userId: userId,
-        role: role,
-        registeredDate: new Date().toISOString().split('T')[0],
-      };
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, userId, password, role }),
+      credentials: 'include', // Send cookies
+    });
 
-      sessionStorage.setItem('aau_user', JSON.stringify(newUser));
-      setUser(newUser);
-      setIsAuthenticated(true);
-    } else {
-      throw new Error('Invalid registration data');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Registration failed');
     }
+
+    const data = await response.json();
+    setUser(data.user);
+    setIsAuthenticated(true);
   }, []);
 
-  const logout = useCallback(() => {
+  // [INTEGRATED] Call /api/auth/logout to clear session
+  const logout = useCallback(async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('[v0] Logout error:', error);
+    }
     setUser(null);
-    sessionStorage.removeItem('aau_user');
     setIsAuthenticated(false);
   }, []);
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
-      {children}
+      {/* Show loading state while checking session - prevents flash of login page */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }

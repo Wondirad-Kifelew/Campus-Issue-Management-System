@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/lib/context';
 import { GraduationCap, Users, Shield, ArrowLeft, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner'; // [INTEGRATED] Toast notifications for feedback
 
 const roleConfig = {
   student: {
@@ -55,11 +56,18 @@ export function LoginForm() {
     try {
       if (!userId || !password) throw new Error('Please fill in all fields');
       if (password.length < 6) throw new Error('Password must be at least 6 characters');
+      
+      // [INTEGRATED] Call API login instead of mock - shows spinner during request
       await login(userId, password, role);
       
+      // [INTEGRATED] Show success toast and redirect
+      toast.success('Login successful!');
       router.push(role === 'staff' ? '/staff' : role === 'admin' ? '/admin' : '/student');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      const errorMsg = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMsg);
+      // [INTEGRATED] Show error toast for API failures
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
