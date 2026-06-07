@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error(
-    'MONGODB_URI is not defined. Please add it to your .env.local file.'
-  );
+// [INTEGRATED] Get MONGODB_URI at runtime instead of build time to support env vars
+function getMongoDBURI(): string {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('MONGODB_URI is not defined. Please add it to your environment variables.');
+  }
+  return uri;
 }
 
 // Cache the connection across hot reloads in development
@@ -29,8 +30,9 @@ export async function connectDB(): Promise<mongoose.Connection> {
   }
 
   if (!cached.promise) {
+    // [INTEGRATED] Use getMongoDBURI() to get URI at runtime
     cached.promise = mongoose
-      .connect(MONGODB_URI as string, {
+      .connect(getMongoDBURI(), {
         bufferCommands: false,
       })
       .then((m) => m.connection);

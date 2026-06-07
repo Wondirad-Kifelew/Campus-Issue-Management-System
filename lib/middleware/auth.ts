@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import type { UserRole } from '@/lib/types';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET is not defined. Please add it to your .env.local file.');
+// [INTEGRATED] Get JWT_SECRET at runtime instead of build time to support env vars
+function getJWTSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined. Please add it to your environment variables.');
+  }
+  return secret;
 }
 
 export interface JWTPayload {
@@ -21,7 +24,8 @@ export function verifyToken(request: NextRequest): JWTPayload | null {
   try {
     const token = request.cookies.get('aau_token')?.value;
     if (!token) return null;
-    return jwt.verify(token, JWT_SECRET as string) as JWTPayload;
+    // [INTEGRATED] Use getJWTSecret() to get secret at runtime
+    return jwt.verify(token, getJWTSecret()) as JWTPayload;
   } catch {
     return null;
   }
@@ -55,7 +59,8 @@ export function enforceRole(
 
 // Creates a signed JWT for a user after login/register
 export function signToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET as string, { expiresIn: '7d' });
+  // [INTEGRATED] Use getJWTSecret() to get secret at runtime
+  return jwt.sign(payload, getJWTSecret(), { expiresIn: '7d' });
 }
 
 // Attaches the token as an httpOnly cookie on a response
