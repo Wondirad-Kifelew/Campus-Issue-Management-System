@@ -51,8 +51,8 @@ export interface Notification {
 export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (userId: string, password: string) => Promise<void>;
-  register: (name: string, userId: string, password: string) => Promise<void>;
+  login: (userId: string, password: string, role?: UserRole) => Promise<void>;
+  register: (name: string, userId: string, password: string, role?: UserRole) => Promise<void>;
   logout: () => void;
 }
 
