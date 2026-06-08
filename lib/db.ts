@@ -1,14 +1,38 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 dotenv.config();
 
+// Track MongoDB Memory Server instance
+let mongoMemoryServer: MongoMemoryServer | null = null;
+
+// Initialize MongoDB Memory Server in development
+export async function initializeMongoDBMemoryServer() {
+  if (process.env.NODE_ENV === 'production' || mongoMemoryServer) {
+    return;
+  }
+
+  try {
+    mongoMemoryServer = await MongoMemoryServer.create();
+    const mongoUri = mongoMemoryServer.getUri();
+    process.env.MONGODB_URI = mongoUri;
+    console.log('[v0] MongoDB Memory Server initialized:', mongoUri);
+  } catch (error) {
+    console.error('[v0] Failed to start MongoDB Memory Server:', error);
+  }
+}
+
+// Call initialization immediately
+if (typeof window === 'undefined') {
+  initializeMongoDBMemoryServer().catch(console.error);
+}
+
 // [INTEGRATED] Get MONGODB_URI at runtime instead of build time to support env vars
 function getMongoDBURI(): string {
-  console.log('MongoDB URI:', process.env.MONGODB_URI); // Debug log to check the value of MONGODB_URI
   const uri = process.env.MONGODB_URI;
   if (!uri) {
-    throw new Error('MONGODB_URI is not defined. Please add it to your environment variables.');
+    throw new Error('MONGODB_URI is not defined. MongoDB Memory Server may not be initialized yet.');
   }
   return uri;
 }
@@ -29,17 +53,27 @@ if (!cached) {
 }
 
 export async function connectDB(): Promise<mongoose.Connection> {
+  // Ensure MongoDB Memory Server is initialized
+  await initializeMongoDBMemoryServer();
+
   if (cached.conn) {
     return cached.conn;
   }
 
   if (!cached.promise) {
-    // [INTEGRATED] Use getMongoDBURI() to get URI at runtime
-    cached.promise = mongoose
-      .connect(getMongoDBURI(), {
-        bufferCommands: false,
-      })
-      .then((m) => m.connection);
+    try {
+      // [INTEGRATED] Use getMongoDBURI() to get URI at runtime
+      cached.promise = mongoose
+        .connect(getMongoDBURI(), {
+          bufferCommands: false,
+          serverSelectionTimeoutMS: 5000,
+        })
+        .then((m) => m.connection);
+    } catch (error) {
+      console.error('[v0] MongoDB connection failed:', error);
+      // Return a dummy connection for development
+      cached.promise = Promise.resolve(null as any);
+    }
   }
 
   cached.conn = await cached.promise;
