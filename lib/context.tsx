@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { User, Issue, Notification, AuthContextType, IssueContextType } from './types';
+import { User, Issue, Notification, Category, AuthContextType, IssueContextType } from './types';
 import { toast } from 'sonner'; // [INTEGRATED] Toast notifications for API operations
 import { usePathname } from 'next/navigation';
 
@@ -142,9 +142,20 @@ const normailzeNotification = (notification: any) => {
     id: _id?.toString() ?? notification.id,
   };
 };
+
+const normalizeCategory = (category: any): Category => {
+  if (category.id && !category._id) return category;
+
+  const { _id, ...rest } = category;
+  return {
+    ...rest,
+    id: _id?.toString() ?? category.id,
+  };
+};
 export function IssueProvider({ children }: { children: ReactNode }) {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingIssues, setIsLoadingIssues] = useState(false);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const pathname = usePathname(); 
@@ -204,6 +215,103 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     };
 
     fetchNotifications();
+  }, []);
+
+  // [INTEGRATED] Fetch categories from API on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          setCategories((data.categories || []).map(normalizeCategory));
+        } else {
+          console.error('[v0] Failed to fetch categories:', response.statusText);
+          setCategories([]);
+        }
+      } catch (error) {
+        console.error('[v0] Error fetching categories:', error);
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // [INTEGRATED] Call /api/categories POST to create a new category
+  const addCategory = useCallback(async (name: string, description?: string) => {
+    try {
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add category');
+      }
+
+      const data = await response.json();
+      setCategories((prev) => [...prev, normalizeCategory(data.category)]);
+      toast.success('Category added successfully');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to add category';
+      toast.error(errorMsg);
+      console.error('[v0] Error adding category:', error);
+    }
+  }, []);
+
+  // [INTEGRATED] Call /api/categories/:id PATCH to update a category
+  const updateCategory = useCallback(
+    async (id: string, updates: { name?: string; description?: string }) => {
+      try {
+        const response = await fetch(`/api/categories/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates),
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update category');
+        }
+
+        const data = await response.json();
+        const updated = normalizeCategory(data.category);
+        setCategories((prev) => prev.map((c) => (c.id === id ? updated : c)));
+        toast.success('Category updated successfully');
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Failed to update category';
+        toast.error(errorMsg);
+        console.error('[v0] Error updating category:', error);
+      }
+    },
+    []
+  );
+
+  // [INTEGRATED] Call /api/categories/:id DELETE to remove a category
+  const deleteCategory = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`/api/categories/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete category');
+      }
+
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+      toast.success('Category deleted successfully');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to delete category';
+      toast.error(errorMsg);
+      console.error('[v0] Error deleting category:', error);
+    }
   }, []);
 
   // [INTEGRATED] Call /api/issues POST to create new issue
@@ -409,6 +517,10 @@ export function IssueProvider({ children }: { children: ReactNode }) {
       value={{
         issues,
         notifications,
+        categories,
+        addCategory,
+        updateCategory,
+        deleteCategory,
         addIssue,
         updateIssue,
         deleteIssue,

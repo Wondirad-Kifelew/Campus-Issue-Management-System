@@ -36,7 +36,6 @@ const UserSchema = new Schema<IUser>(
     },
     staffCategory: {
       type: String,
-      enum: ['Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others'],
       default: undefined,
     },
     status: {

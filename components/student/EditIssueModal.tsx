@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Issue, IssueCategory } from '@/lib/types';
+import { useIssue } from '@/lib/context';
 import { X } from 'lucide-react';
 
 interface EditIssueModalProps {
@@ -10,20 +11,12 @@ interface EditIssueModalProps {
   onCancel: () => void;
 }
 
-const CATEGORIES: IssueCategory[] = [
-  'Infrastructure',
-  'Cleanliness',
-  'Technology',
-  'Safety',
-  'Cafeteria',
-  'Others',
-];
-
 export function EditIssueModal({
   issue,
   onSave,
   onCancel,
 }: EditIssueModalProps) {
+  const { categories } = useIssue();
   const [title, setTitle] = useState(issue.title);
   const [description, setDescription] = useState(issue.description);
   const [category, setCategory] = useState(issue.category);
@@ -77,9 +70,9 @@ export function EditIssueModal({
               onChange={(e) => setCategory(e.target.value as IssueCategory)}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
                 </option>
               ))}
             </select>

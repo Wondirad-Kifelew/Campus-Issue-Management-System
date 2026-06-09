@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { IssueCategory } from '@/lib/types';
+import { useIssue } from '@/lib/context';
 
 interface IssueFormProps {
   onSubmit: (data: {
@@ -13,24 +14,20 @@ interface IssueFormProps {
   isLoading?: boolean;
 }
 
-const CATEGORIES: IssueCategory[] = [
-  'Infrastructure',
-  'Cleanliness',
-  'Technology',
-  'Safety',
-  'Cafeteria',
-  'Others',
-];
-
 export function IssueForm({ onSubmit, onCancel, isLoading = false }: IssueFormProps) {
+  const { categories } = useIssue();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<IssueCategory>('Infrastructure');
+  const [category, setCategory] = useState<IssueCategory>('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) {
       alert('Please fill in all fields');
+      return;
+    }
+    if (!category) {
+      alert('Please select a category');
       return;
     }
     onSubmit({ title, description, category });
@@ -62,9 +59,12 @@ export function IssueForm({ onSubmit, onCancel, isLoading = false }: IssueFormPr
           onChange={(e) => setCategory(e.target.value as IssueCategory)}
           className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
+          <option value="" disabled>
+            Select a category
+          </option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.name}>
+              {cat.name}
             </option>
           ))}
         </select>

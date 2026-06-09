@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useIssue, useAuth } from '@/lib/context';
 import { Issue, IssueCategory, IssueStatus } from '@/lib/types';
+import { getCategoryColor } from '@/lib/category-colors';
 import { ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import Link from 'next/link';
 
@@ -12,15 +13,6 @@ const statusColors = {
   Pending: 'bg-orange-100 text-orange-700',
   'In Progress': 'bg-blue-100 text-blue-700',
   Resolved: 'bg-green-100 text-green-700',
-};
-
-const categoryColors: Record<IssueCategory, string> = {
-  Infrastructure: 'bg-indigo-100 text-indigo-700',
-  Cleanliness: 'bg-cyan-100 text-cyan-700',
-  Technology: 'bg-purple-100 text-purple-700',
-  Safety: 'bg-red-100 text-red-700',
-  Cafeteria: 'bg-yellow-100 text-yellow-700',
-  Others: 'bg-gray-100 text-gray-700',
 };
 
 export default function StaffIssuesPage() {
@@ -97,7 +89,7 @@ export default function StaffIssuesPage() {
             </label>
             <div className="w-full flex items-center justify-center px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-900 text-sm">
               {user?.staffCategory ? (
-                <span className={`gap-2 px-3 py-1 rounded-full text-sm font-bold ${categoryColors[user.staffCategory]}`}>
+                <span className={`gap-2 px-3 py-1 rounded-full text-sm font-bold ${getCategoryColor(user.staffCategory)}`}>
                   {user.staffCategory}
                 </span>
               ) : (
@@ -166,7 +158,7 @@ export default function StaffIssuesPage() {
                       <td className="px-6 py-4 text-sm">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            categoryColors[issue?.category]
+                            getCategoryColor(issue?.category)
                           }`}
                         >
                           {issue?.category}

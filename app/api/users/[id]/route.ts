@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/db';
 import User from '@/lib/models/User';
 import { enforceRole } from '@/lib/middleware/auth';
+import { getValidCategoryNames } from '@/lib/categories';
 import type { IssueCategory } from '@/lib/types';
 
 type Params = { params: { id: string } };
@@ -50,9 +51,7 @@ console.log('Received update for user ID:', id, 'with body:', body); // Debug lo
 
   // FR17: admin can reassign the category of a staff member
   if (body.staffCategory !== undefined && user.role === 'staff') {
-    const validCategories: IssueCategory[] = [
-      'Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others',
-    ];
+    const validCategories = await getValidCategoryNames();
     if (!validCategories.includes(body.staffCategory)) {
       return NextResponse.json({ error: 'Invalid staffCategory' }, { status: 400 });
     }
