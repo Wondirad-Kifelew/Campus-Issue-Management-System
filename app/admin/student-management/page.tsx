@@ -1,73 +1,76 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit2, X, Check } from 'lucide-react';
-
-interface Student {
-  id: string;
-  name: string;
-  studentId: string;
-  status: 'Active' | 'Deactivated';
-  dateJoined: string;
-}
+import { useAdmin } from '@/lib/context';
+import { User } from '@/lib/types';
 
 export default function StudentManagement() {
-  const [students, setStudents] = useState<Student[]>([
-    { id: '1', name: 'Mickyas Alemu', studentId: 'NSE/3422/15', status: 'Active', dateJoined: '2026-03-10' },
-    { id: '2', name: 'Amanuel Legesse', studentId: 'UGR/1221/13', status: 'Deactivated', dateJoined: '2026-01-15' },
-    { id: '3', name: 'Habtam Alemu', studentId: 'NSR/1224/16', status: 'Active', dateJoined: '2026-01-03' },
-  ]);
-
+  const { users, isLoadingUsers, fetchUsers, addUser, updateUser, deleteUser } = useAdmin();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  const [editStudentId, setEditStudentId] = useState('');
+  const [editUserId, setEditUserId] = useState('');  
   const [showAddForm, setShowAddForm] = useState(false);
   const [addFormData, setAddFormData] = useState({
     name: '',
-    studentId: '',
+    userId: '',
+    password: '',
   });
 
-  const handleEdit = (student: Student) => {
-    setEditingId(student.id);
+  useEffect(() => {
+    fetchUsers('student');
+  }, [fetchUsers]);
+
+  const students = users.filter(u => u.role === 'student');
+// console.log('Fetched users:', users); // Debug log to check fetched students
+// console.log("sample status of first student:", students[0]?.status); // Debug log to check status field of students
+  const handleEdit = (student: User) => {
+
+    setEditingId(student.userId);
     setEditName(student.name);
-    setEditStudentId(student.studentId);
+    setEditUserId(student.userId);
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditName('');
-    setEditStudentId('');
   };
 
-  const handleSubmitEdit = (id: string) => {
-    setStudents(students.map(s => 
-      s.id === id ? { ...s, name: editName, studentId: editStudentId } : s
-    ));
+  const handleSubmitEdit = async () => {
+    
+    
+    const editedStudent = users.filter(u => u.userId === editingId);
+    if (!editedStudent) return;
+    
+    await updateUser(editedStudent[0].id, { name: editName, userId: editUserId });
+    
     setEditingId(null);
     setEditName('');
-    setEditStudentId('');
   };
 
-  const handleToggleStatus = (id: string) => {
-    setStudents(students.map(s => 
-      s.id === id ? { ...s, status: s.status === 'Active' ? 'Deactivated' : 'Active' } : s
-    ));
+  const handleToggleStatus = async (student: User) => {
+
+    if (!student.id) return;
+    const newStatus = student.status === 'Active' ? 'Deactivated' : 'Active';
+    await updateUser(student.id, { status: newStatus });
   };
 
-  const handleAddStudent = () => {
-    if (addFormData.name.trim() && addFormData.studentId.trim()) {
-      const newStudent: Student = {
-        id: String(students.length + 1),
-        name: addFormData.name,
-        studentId: addFormData.studentId,
-        status: 'Active',
-        dateJoined: new Date().toISOString().split('T')[0],
-      };
-      setStudents([...students, newStudent]);
-      setAddFormData({ name: '', studentId: '' });
+  const handleAddStudent = async () => {
+    if (addFormData.name.trim() && addFormData.userId.trim() && addFormData.password.trim()) {
+    
+      await addUser(addFormData.name, addFormData.userId, addFormData.password, 'student');
+      setAddFormData({ name: '', userId: '', password: '' });
       setShowAddForm(false);
     }
   };
+
+  if (isLoadingUsers) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl">
@@ -92,47 +95,47 @@ export default function StudentManagement() {
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Student ID</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">User ID</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Date Joined</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Date Registered</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {students.map((student) => (
-                <tr key={student.id} className="border-b border-slate-200 hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm text-slate-900">{student.name}</td>
-                  <td className="px-6 py-4 text-sm text-slate-900">{student.studentId}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      student.status === 'Active' 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {student.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-900">{student.dateJoined}</td>
-                  <td className="px-6 py-4 text-sm space-x-2 flex">
-                    <button
-                      onClick={() => handleEdit(student)}
-                      className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleToggleStatus(student.id)}
-                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                        student.status === 'Active'
-                          ? 'bg-red-100 hover:bg-red-200 text-red-700'
-                          : 'bg-green-100 hover:bg-green-200 text-green-700'
-                      }`}
-                    >
-                      {student.status === 'Active' ? 'Deactivate' : 'Activate'}
-                    </button>
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center text-slate-600">
+                    No students yet
                   </td>
                 </tr>
-              ))}
+              ) : (
+                students.map((student) => (
+                  <tr key={student.id} className="border-b border-slate-200 hover:bg-slate-50">
+                    <td className="px-6 py-4 text-sm text-slate-900">{student.name}</td>
+                    <td className="px-6 py-4 text-sm text-slate-900">{student.userId}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${student.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {student.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-900">{student.registeredDate}</td>
+                    <td className="px-6 py-4 text-sm space-x-2 flex">
+                      <button
+                        onClick={() => handleEdit(student)}
+                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleStatus(student)}
+                        className={`px-3 py-1 rounded text-xs font-medium transition-colors ${student.status === 'Active' ? 'bg-red-100 hover:bg-red-200 text-red-700' : 'bg-green-100 hover:bg-green-200 text-green-700'}`}
+                      >
+                        {student.status === 'Active' ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -156,13 +159,23 @@ export default function StudentManagement() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Student ID</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">User ID</label>
                 <input
                   type="text"
-                  value={addFormData.studentId}
-                  onChange={(e) => setAddFormData({ ...addFormData, studentId: e.target.value })}
+                  value={addFormData.userId}
+                  onChange={(e) => setAddFormData({ ...addFormData, userId: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Student ID"
+                  placeholder="User ID"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                <input
+                  type="password"
+                  value={addFormData.password}
+                  onChange={(e) => setAddFormData({ ...addFormData, password: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Password"
                 />
               </div>
             </div>
@@ -171,7 +184,7 @@ export default function StudentManagement() {
               <button
                 onClick={() => {
                   setShowAddForm(false);
-                  setAddFormData({ name: '', studentId: '' });
+                  setAddFormData({ name: '', userId: '', password: '' });
                 }}
                 className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
               >
@@ -204,12 +217,15 @@ export default function StudentManagement() {
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+            </div>
+
+             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Student ID</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">User ID</label>
                 <input
                   type="text"
-                  value={editStudentId}
-                  onChange={(e) => setEditStudentId(e.target.value)}
+                  value={editUserId}
+                  onChange={(e) => setEditUserId(e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -223,7 +239,7 @@ export default function StudentManagement() {
                 Cancel
               </button>
               <button
-                onClick={() => handleSubmitEdit(editingId)}
+                onClick={() => handleSubmitEdit()}
                 className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
                 Submit changes

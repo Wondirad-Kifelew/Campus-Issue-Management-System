@@ -1,16 +1,28 @@
 'use client';
 
-import { useAuth, useIssue } from '@/lib/context';
+import { useEffect } from 'react';
+import { useAuth, useAdmin } from '@/lib/context';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const { issues } = useIssue();
+  const { stats, isLoadingStats, fetchStats } = useAdmin();
 
-  // Mock data for admin dashboard
-  const totalUsers = 1278;
-  const totalStaffs = 32;
-  const totalStudents = 1246;
-  const totalIssues = 212;
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  if (isLoadingStats) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  const totalUsers = stats?.totalUsers || 0;
+  const totalStaffs = stats?.totalStaffs || 0;
+  const totalStudents = stats?.totalStudents || 0;
+  const totalIssues = stats?.totalIssues || 0;
 
   return (
     <div className="max-w-6xl">

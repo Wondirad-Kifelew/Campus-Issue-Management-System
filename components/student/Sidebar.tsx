@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter} from 'next/navigation';
 import { FileText, CheckSquare, List, Bell, LogOut, X } from 'lucide-react';
-import { useAuth } from '@/lib/context';
+import { useAuth, useIssue } from '@/lib/context';
+import { useState } from 'react';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -13,6 +14,8 @@ export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuth();
+  const {markAllNonReplyAsRead} = useIssue();
+  const [notificationClick, setNotificationClick] = useState(false);
 
   // Disable student menu if user is staff
   if (user?.role === 'staff') {
@@ -26,13 +29,22 @@ export function Sidebar({ onClose }: SidebarProps) {
     { href: '/student/notifications', label: 'Notifications', icon: Bell },
   ];
 
+
   const handleLogout = () => {
     logout();
     router.push('/');
     onClose?.();
   };
 
-  const handleNavClick = () => {
+  const handleNavClick = async () => {
+    // if notificaion is clicked, call this function to mark it as read and open the reply modal
+    if (pathname === '/student/notifications') {
+      setNotificationClick(true);
+      await markAllNonReplyAsRead();
+    } else {
+      setNotificationClick(false);
+    }
+    
     onClose?.();
   };
 

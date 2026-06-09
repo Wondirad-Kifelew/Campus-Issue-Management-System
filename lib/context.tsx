@@ -8,6 +8,15 @@ import { usePathname } from 'next/navigation';
 // Auth Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const normalizeUser = (user: any) => {
+  if (user.id && !user._id) return user;
+  const { _id, ...rest } = user;
+  return {
+    ...rest,
+    id: _id?.toString() ?? user.id,
+  };
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,11 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // [INTEGRATED] Call /api/auth/login instead of mock authentication
-  const login = useCallback(async (userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
+  const login = useCallback(async (userId: string, password: string, role?: 'student' | 'staff' | 'admin') => {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, password, role }),
+      body: JSON.stringify({ userId, password, role: role || 'student' }),
       credentials: 'include', // Send cookies
     });
 
@@ -56,11 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // [INTEGRATED] Call /api/auth/register instead of mock registration
-  const register = useCallback(async (name: string, userId: string, password: string, role: 'student' | 'staff' | 'admin' = 'student') => {
+  const register = useCallback(async (name: string, userId: string, password: string, role?: 'student' | 'staff' | 'admin') => {
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, userId, password, role }),
+      body: JSON.stringify({ name, userId, password, role: role || 'student' }),
       credentials: 'include', // Send cookies
     });
 
@@ -124,6 +133,15 @@ const normalizeIssue = (issue: any) => {
   };
 };
 
+const normailzeNotification = (notification: any) => {
+  if (notification.id && !notification._id) return notification;
+
+  const { _id, ...rest } = notification;
+  return {
+    ...rest,
+    id: _id?.toString() ?? notification.id,
+  };
+};
 export function IssueProvider({ children }: { children: ReactNode }) {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -164,11 +182,15 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     const fetchNotifications = async () => {
       setIsLoadingNotifications(true);
       try {
+        console.log('Fetching notifications from API...'); // Debug log to check if API call is made
         const response = await fetch('/api/notifications', { credentials: 'include' });
         console.log('API response for notifications:(in context)', response);
         if (response.ok) {
           const data = await response.json();
-          setNotifications(data.notifications || []);
+          
+            // normalize _id to id for frontend consistency
+          const normalized = data.notifications.map(normailzeNotification);  
+          setNotifications(normalized || []);
         } else {
           console.error('[v0] Failed to fetch notifications:', response.statusText);
           setNotifications([]);
@@ -294,13 +316,14 @@ export function IssueProvider({ children }: { children: ReactNode }) {
   const markNotificationAsRead = useCallback(async (notificationId: string) => {
     try {
       const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ read: true }),
         credentials: 'include',
       });
 
       if (response.ok) {
+
         setNotifications((prev) =>
           prev.map((notif) =>
             notif.id === notificationId ? { ...notif, read: true } : notif
@@ -311,7 +334,25 @@ export function IssueProvider({ children }: { children: ReactNode }) {
       console.error('[v0] Error marking notification as read:', error);
     }
   }, []);
+  // call /api/notifications/mark-all-read to mark all non-reply notifications as read
+  const markAllNonReplyAsRead = useCallback(async () => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        credentials: 'include',
+      });
 
+      if (response.ok) {
+        setNotifications((prev) =>
+          prev.map((notif) =>
+            notif.type !== 'staff_reply' ? { ...notif, read: true } : notif
+          )
+        );
+      }
+    } catch (error) {
+      console.error('[v0] Error marking all non-reply notifications as read:', error);
+    }
+  }, []);
   // [INTEGRATED] Call /api/issues/:id to update status
   const updateStatus = useCallback(async (issueId: string, status: string) => {
     try {
@@ -321,7 +362,6 @@ export function IssueProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ status }),
         credentials: 'include',
       });
-console.log('API response for status update:(in context)', response);
       if (!response.ok) {
         throw new Error('Failed to update status');
       }
@@ -374,6 +414,7 @@ console.log('API response for status update:(in context)', response);
         deleteIssue,
         agreeWithIssue,
         markNotificationAsRead,
+        markAllNonReplyAsRead,
         updateStatus,
         addResponse,
       }}
@@ -394,6 +435,181 @@ export function useIssue() {
   const context = useContext(IssueContext);
   if (context === undefined) {
     throw new Error('useIssue must be used within IssueProvider');
+  }
+  return context;
+}
+
+// Admin Context
+const AdminContext = createContext<AdminContextType | undefined>(undefined);
+
+interface AdminStats {
+  totalUsers: number;
+  totalStaffs: number;
+  totalStudents: number;
+  totalIssues: number;
+}
+
+interface AdminContextType {
+  stats: AdminStats | null;
+  users: User[];
+  isLoadingStats: boolean;
+  isLoadingUsers: boolean;
+  fetchStats: () => Promise<void>;
+  fetchUsers: (role?: string) => Promise<void>;
+  addUser: (name: string, userId: string, password: string, role: string, staffCategory?: string) => Promise<void>;
+  updateUser: (id: string, updates: any) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
+}
+
+export function AdminProvider({ children }: { children: ReactNode }) {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
+  const fetchStats = useCallback(async () => {
+    setIsLoadingStats(true);
+    try {
+      const response = await fetch('/api/users', { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        const allUsers = data.users || [];
+        
+        const staffCount = allUsers.filter((u: User) => u.role === 'staff').length;
+        const studentCount = allUsers.filter((u: User) => u.role === 'student').length;
+        
+        // Fetch issues count
+        const issuesRes = await fetch('/api/issues', { credentials: 'include' });
+        const issuesData = issuesRes.ok ? await issuesRes.json() : { issues: [] };
+        
+        setStats({
+          totalUsers: allUsers.length,
+          totalStaffs: staffCount,
+          totalStudents: studentCount,
+          totalIssues: issuesData.issues?.length || 0,
+        });
+      }
+    } catch (error) {
+      console.error('[v0] Error fetching admin stats:', error);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  }, []);
+
+  const fetchUsers = useCallback(async (role?: string) => {
+    setIsLoadingUsers(true);
+    try {
+      const url = role ? `/api/users?role=${role}` : '/api/users';
+      const response = await fetch(url, { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        // console.log('Fetched users data:(in context)', data.users);
+
+        setUsers(data.users?.map(normalizeUser) || []);
+        // console.log('Normalized users set in context:', data.users?.map(normalizeUser) || []); 
+        // setUsers(data.users || []);
+      }
+    } catch (error) {
+      console.error('[v0] Error fetching users:', error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
+  const addUser = useCallback(async (name: string, userId: string, password: string, role: string, staffCategory?: string) => {
+    try {
+      const body: any = { name, userId, password, role };
+      if (role === 'staff' && staffCategory) {
+        body.staffCategory = staffCategory;
+        //i may add default active if needed
+      }
+      if (role === 'student') {
+        body.status = 'Active'; // Default status for new students
+      } 
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add user');
+      }
+
+      const data = await response.json();
+      
+      // setUsers((prev) => [data.user, ...prev]);
+      setUsers(data.users?.map(normalizeUser) || [])
+      
+      window.location.reload();
+      toast.success('User added successfully');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to add user';
+      toast.error(errorMsg);
+      console.error('[v0] Error adding user:', error);
+    }
+  }, []);
+
+  const updateUser = useCallback(async (id: string, updates: any) => {
+    try {
+      console.log('Updating user ID(in context):', id, 'with updates:', updates); // Debug log to check update data
+      const response = await fetch(`/api/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update user');
+      }
+
+      const data = await response.json();
+      setUsers((prev) =>
+        prev.map((user) => (user.id === id ? normalizeUser(data.user) : user))
+      );
+      
+      toast.success('User updated successfully');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to update user';
+      toast.error(errorMsg);
+      console.error('[v0] Error updating user:', error);
+    }
+  }, []);
+
+  const deleteUser = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`/api/users/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+
+      setUsers((prev) => prev.filter((user) => user.id !== id));
+      toast.success('User deleted successfully');
+    } catch (error) {
+      console.error('[v0] Error deleting user:', error);
+      toast.error('Failed to delete user');
+    }
+  }, []);
+
+  return (
+    <AdminContext.Provider value={{ stats, users, isLoadingStats, isLoadingUsers, fetchStats, fetchUsers, addUser, updateUser, deleteUser }}>
+      {children}
+    </AdminContext.Provider>
+  );
+}
+
+export function useAdmin() {
+  const context = useContext(AdminContext);
+  if (context === undefined) {
+    throw new Error('useAdmin must be used within AdminProvider');
   }
   return context;
 }

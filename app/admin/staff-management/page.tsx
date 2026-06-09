@@ -1,44 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit2, X } from 'lucide-react';
+import { useAdmin } from '@/lib/context';
+import { User } from '@/lib/types';
 
-interface StaffMember {
-  id: string;
-  name: string;
-  staffId: string;
-  issueCategory: string;
-  assignedIssues: number;
-  status: 'Active' | 'Deactivated';
-  dateJoined: string;
-}
-
-interface Category {
-  id: string;
-  name: string;
-}
+const VALID_CATEGORIES = ['Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others'];
 
 export default function StaffManagement() {
-  const [categories] = useState<Category[]>([
-    { id: '1', name: 'Infrastructure' },
-    { id: '2', name: 'Cleanliness' },
-    { id: '3', name: 'IT' },
-  ]);
-
-  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([
-    { id: '1', name: 'Alem Abebe', staffId: 'ST001', issueCategory: 'Canteen', assignedIssues: 8, status: 'Active', dateJoined: '2026-03-10' },
-    { id: '2', name: 'Nahom Minas', staffId: 'ST002', issueCategory: 'Infrastructure', assignedIssues: 12, status: 'Deactivated', dateJoined: '2026-03-10' },
-    { id: '3', name: 'Habtam Alemu', staffId: 'ST023', issueCategory: 'IT', assignedIssues: 2, status: 'Active', dateJoined: '2026-03-10' },
-  ]);
-
+  const { users, isLoadingUsers, fetchUsers, addUser, updateUser, deleteUser } = useAdmin();
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    staffId: '',
-    issueCategory: '',
+    userId: '',
+    password: '',
+    staffCategory: '',
   });
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    userId: '',
+    staffCategory: '',
+  });
+
+  useEffect(() => {
+    fetchUsers('staff');
+  }, [fetchUsers]);
+
+  const staffMembers = users.filter(u => u.role === 'staff');
 
   const handleFormChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -47,57 +37,58 @@ export default function StaffManagement() {
     }));
   };
 
-  const handleAddStaff = () => {
-    if (formData.name && formData.staffId && formData.issueCategory) {
-      const newStaff: StaffMember = {
-        id: String(staffMembers.length + 1),
-        name: formData.name,
-        staffId: formData.staffId,
-        issueCategory: formData.issueCategory,
-        assignedIssues: 0,
-        status: 'Active',
-        dateJoined: new Date().toISOString().split('T')[0],
-      };
-      setStaffMembers([...staffMembers, newStaff]);
-      setFormData({ name: '', staffId: '', issueCategory: '' });
+  const handleAddStaff = async () => {
+    if (formData.name && formData.userId && formData.password && formData.staffCategory) {
+      await addUser(formData.name, formData.userId, formData.password, 'staff', formData.staffCategory);
+      setFormData({ name: '', userId: '', password: '', staffCategory: '' });
       setShowAddForm(false);
     }
   };
 
-  const handleEditStaff = (staff: StaffMember) => {
+  const handleEditStaff = (staff: User) => {
     setEditingId(staff.id);
-    setFormData({
+
+    setEditFormData({
       name: staff.name,
-      staffId: staff.staffId,
-      issueCategory: staff.issueCategory,
+      userId: staff.userId || '',
+      staffCategory: staff.staffCategory || '',
     });
     setShowEditForm(true);
   };
 
-  const handleSubmitEdit = () => {
-    if (formData.name && formData.staffId && formData.issueCategory && editingId) {
-      setStaffMembers(staffMembers.map(s =>
-        s.id === editingId
-          ? { ...s, name: formData.name, staffId: formData.staffId, issueCategory: formData.issueCategory }
-          : s
-      ));
-      setFormData({ name: '', staffId: '', issueCategory: '' });
+  const handleSubmitEdit = async () => {
+    
+    if (editFormData.name && editFormData.userId && editFormData.staffCategory && editingId) {
+      await updateUser(editingId, {
+        name: editFormData.name,
+        userId: editFormData.userId,
+        staffCategory: editFormData.staffCategory,
+      });
+      setEditFormData({ name: '', userId: '', staffCategory: '' });
       setEditingId(null);
       setShowEditForm(false);
     }
   };
 
   const handleCancelEdit = () => {
-    setFormData({ name: '', staffId: '', issueCategory: '' });
+    setEditFormData({ name: '', userId: '', staffCategory: '' });
     setEditingId(null);
     setShowEditForm(false);
   };
 
-  const handleToggleStatus = (id: string) => {
-    setStaffMembers(staffMembers.map(s =>
-      s.id === id ? { ...s, status: s.status === 'Active' ? 'Deactivated' : 'Active' } : s
-    ));
+  const handleToggleStatus = async (staff: User) => {
+    if (!staff.id) return;
+    const newStatus = staff.status === 'Active' ? 'Deactivated' : 'Active';
+    await updateUser(staff.id, { status: newStatus });
   };
+
+  if (isLoadingUsers) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl">
@@ -122,51 +113,49 @@ export default function StaffManagement() {
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Staff ID</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">User ID</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Issue Category</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Assigned Issues</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Date Joined</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Date Registered</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-slate-900">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {staffMembers.map((staff) => (
-                <tr key={staff.id} className="border-b border-slate-200 hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm text-slate-900">{staff.name}</td>
-                  <td className="px-6 py-4 text-sm text-slate-900">{staff.staffId}</td>
-                  <td className="px-6 py-4 text-sm text-slate-900">{staff.issueCategory}</td>
-                  <td className="px-6 py-4 text-sm text-slate-900">{staff.assignedIssues}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      staff.status === 'Active' 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {staff.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-900">{staff.dateJoined}</td>
-                  <td className="px-6 py-4 text-sm space-x-2 flex">
-                    <button
-                      onClick={() => handleEditStaff(staff)}
-                      className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleToggleStatus(staff.id)}
-                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                        staff.status === 'Active'
-                          ? 'bg-red-100 hover:bg-red-200 text-red-700'
-                          : 'bg-green-100 hover:bg-green-200 text-green-700'
-                      }`}
-                    >
-                      {staff.status === 'Active' ? 'Deactivate' : 'Activate'}
-                    </button>
+              {staffMembers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 text-center text-slate-600">
+                    No staff members yet
                   </td>
                 </tr>
-              ))}
+              ) : (
+                staffMembers.map((staff) => (
+                  <tr key={staff.id} className="border-b border-slate-200 hover:bg-slate-50">
+                    <td className="px-6 py-4 text-sm text-slate-900">{staff.name}</td>
+                    <td className="px-6 py-4 text-sm text-slate-900">{staff.userId}</td>
+                    <td className="px-6 py-4 text-sm text-slate-900">{staff.staffCategory || 'Unassigned'}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${staff.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {staff.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-900">{staff.registeredDate}</td>
+                    <td className="px-6 py-4 text-sm space-x-2 flex">
+                      <button
+                        onClick={() => handleEditStaff(staff)}
+                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleStatus(staff)}
+                        className={`px-3 py-1 rounded text-xs font-medium transition-colors ${staff.status === 'Active' ? 'bg-red-100 hover:bg-red-200 text-red-700' : 'bg-green-100 hover:bg-green-200 text-green-700'}`}
+                      >
+                        {staff.status === 'Active' ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -183,33 +172,33 @@ export default function StaffManagement() {
                 <label className="block text-sm font-medium text-slate-700 mb-2">Name</label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => handleFormChange('name', e.target.value)}
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Staff name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Staff ID</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">User ID</label>
                 <input
                   type="text"
-                  value={formData.staffId}
-                  onChange={(e) => handleFormChange('staffId', e.target.value)}
+                  value={editFormData.userId}
+                  onChange={(e) => setEditFormData({...editFormData, userId: e.target.value})}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Staff ID"
+                  placeholder="Staff name"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Issue Category</label>
                 <select
-                  value={formData.issueCategory}
-                  onChange={(e) => handleFormChange('issueCategory', e.target.value)}
+                  value={editFormData.staffCategory}
+                  onChange={(e) => setEditFormData({...editFormData, staffCategory: e.target.value})}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select a category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
+                  {VALID_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
                     </option>
                   ))}
                 </select>
@@ -252,26 +241,36 @@ export default function StaffManagement() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Staff ID</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">User ID</label>
                 <input
                   type="text"
-                  value={formData.staffId}
-                  onChange={(e) => handleFormChange('staffId', e.target.value)}
+                  value={formData.userId}
+                  onChange={(e) => handleFormChange('userId', e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Staff ID"
+                  placeholder="User ID"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => handleFormChange('password', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Password"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Issue Category</label>
                 <select
-                  value={formData.issueCategory}
-                  onChange={(e) => handleFormChange('issueCategory', e.target.value)}
+                  value={formData.staffCategory}
+                  onChange={(e) => handleFormChange('staffCategory', e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select a category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
+                  {VALID_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
                     </option>
                   ))}
                 </select>
@@ -282,7 +281,7 @@ export default function StaffManagement() {
               <button
                 onClick={() => {
                   setShowAddForm(false);
-                  setFormData({ name: '', staffId: '', issueCategory: '' });
+                  setFormData({ name: '', userId: '', password: '', staffCategory: '' });
                 }}
                 className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
               >
@@ -292,7 +291,7 @@ export default function StaffManagement() {
                 onClick={handleAddStaff}
                 className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
-                Add staff Member
+                Add Staff Member
               </button>
             </div>
           </div>

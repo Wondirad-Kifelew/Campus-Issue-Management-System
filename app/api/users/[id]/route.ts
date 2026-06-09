@@ -10,12 +10,13 @@ type Params = { params: { id: string } };
 
 // GET /api/users/:id  — admin only
 export async function GET(request: NextRequest, { params }: Params) {
+  const {id } = await params;
   const auth = enforceRole(request, ['admin']);
   if (auth instanceof NextResponse) return auth;
 
   await connectDB();
 
-  const user = await User.findById(params.id).select('-password').lean();
+  const user = await User.findById(id).select('-password').lean();
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
@@ -25,19 +26,20 @@ export async function GET(request: NextRequest, { params }: Params) {
 
 // PATCH /api/users/:id  — admin updates user details or status (FR15, FR16, FR17)
 export async function PATCH(request: NextRequest, { params }: Params) {
+  const { id } = await params;
   const auth = enforceRole(request, ['admin']);
   if (auth instanceof NextResponse) return auth;
 
   await connectDB();
-
-  const user = await User.findById(params.id);
+  const user = await User.findById(id);
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
   const body = await request.json();
-
+console.log('Received update for user ID:', id, 'with body:', body); // Debug log to check incoming data
   if (body.name !== undefined)   user.name   = body.name.trim();
+  if (body.userId !== undefined) user.userId = body.userId.trim();
 
   if (body.status !== undefined) {
     if (!['Active', 'Deactivated'].includes(body.status)) {
@@ -80,7 +82,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       staffCategory:  user.staffCategory ?? null,
       status:         user.status,
       registeredDate: user.registeredDate,
-    },
+    }
   });
 }
 
@@ -91,7 +93,8 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
   await connectDB();
 
-  const user = await User.findById(params.id);
+  const { id } = await params;
+  const user = await User.findById(id);
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }

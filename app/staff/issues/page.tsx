@@ -93,11 +93,11 @@ export default function StaffIssuesPage() {
           {/* Filter by Category */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Your Category: {user?.staffCategory || 'Unassigned'}
+              Your Category:
             </label>
-            <div className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-900 text-sm">
+            <div className="w-full flex items-center justify-center px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-900 text-sm">
               {user?.staffCategory ? (
-                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${categoryColors[user.staffCategory]}`}>
+                <span className={`gap-2 px-3 py-1 rounded-full text-sm font-bold ${categoryColors[user.staffCategory]}`}>
                   {user.staffCategory}
                 </span>
               ) : (

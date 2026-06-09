@@ -1,6 +1,7 @@
 export type UserRole = 'student' | 'staff' | 'admin';
 
-export type IssueCategory = 'Infrastructure' | 'Cleanliness' | 'Technology' | 'Safety' | 'Cafeteria' | 'Others';
+// export type IssueCategory = 'Infrastructure' | 'Cleanliness' | 'Technology' | 'Safety' | 'Cafeteria' | 'Others';
+export type IssueCategory = string;
 
 export type IssueStatus = 'Pending' | 'In Progress' | 'Resolved';
 
@@ -11,6 +12,7 @@ export interface User {
   name: string;
   userId: string;
   role: UserRole;
+  status: string;
   registeredDate: string;
   staffCategory?: IssueCategory; // Category assigned to staff members
 }
@@ -48,22 +50,33 @@ export interface Notification {
   staffName?: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  createdBy: string; 
+  createdAt: string;
+}
+
 export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (userId: string, password: string) => Promise<void>;
-  register: (name: string, userId: string, password: string) => Promise<void>;
+  login: (userId: string, password: string, role?: UserRole) => Promise<void>;
+  register: (name: string, userId: string, password: string, role?: UserRole) => Promise<void>;
   logout: () => void;
 }
 
 export interface IssueContextType {
   issues: Issue[];
   notifications: Notification[];
+  categories: Category[];
+  addCategory: (name: string, description?: string) => void;
   addIssue: (issue: Omit<Issue, 'id' | 'agreementCount' | 'agreedBy'>) => void;
   updateIssue: (id: string, updates: Partial<Issue>) => void;
   deleteIssue: (id: string) => void;
   agreeWithIssue: (issueId: string, studentId: string) => void;
   markNotificationAsRead: (notificationId: string) => void;
+  markAllNonReplyAsRead: () => Promise<void>; 
   updateStatus: (issueId: string, status: IssueStatus) => void;
   addResponse: (issueId: string, staffId: string, staffName: string, response: string) => void;
 }

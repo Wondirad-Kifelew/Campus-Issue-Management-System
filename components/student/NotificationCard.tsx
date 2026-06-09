@@ -38,6 +38,14 @@ export function NotificationCard({
     }
   };
 
+  // time stamp adjust
+  const notificationTimestamp = new Date(notification.timestamp).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
   return (
     <div
       className={`border rounded-lg p-6 ${
@@ -63,7 +71,7 @@ export function NotificationCard({
               <strong>{notification.staffName}</strong> replied to your issue
             </p>
           )}
-          <p className="text-xs text-slate-500 mt-2">{notification.timestamp}</p>
+          <p className="text-xs text-slate-500 mt-2">{notificationTimestamp}</p>
         </div>
 
         {notification.type === 'staff_reply' && onViewReply && (

@@ -32,8 +32,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = enforceRole(request, ['admin']);
   if (auth instanceof NextResponse) return auth;
-
-  const { name, userId, password, role, staffCategory } = await request.json();
+  const { name, userId, password, role, status, staffCategory } = await request.json();
 
   if (!name || !userId || !password || !role) {
     return NextResponse.json(
@@ -55,12 +54,12 @@ export async function POST(request: NextRequest) {
 
   // Staff must have a category assigned (FR17 / BR-6)
   if (role === 'staff') {
-    const validCategories: IssueCategory[] = [
-      'Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others',
-    ];
-    if (!staffCategory || !validCategories.includes(staffCategory)) {
+    // const validCategories: IssueCategory[] = [
+    //   'Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others',
+    // ];
+    if (!staffCategory) {
       return NextResponse.json(
-        { error: 'A valid staffCategory is required for staff accounts' },
+        { error: 'A staffCategory is required for staff accounts' },
         { status: 400 }
       );
     }
@@ -84,7 +83,7 @@ export async function POST(request: NextRequest) {
     password: hashedPassword,
     role,
     staffCategory: role === 'staff' ? staffCategory : undefined,
-    status: 'Active',
+    status,
   });
 
   return NextResponse.json(
