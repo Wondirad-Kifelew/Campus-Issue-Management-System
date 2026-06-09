@@ -44,7 +44,6 @@ const IssueSchema = new Schema<IIssue>(
     },
     category: {
       type: String,
-      enum: ['Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others'],
       required: true,
     },
     status: {

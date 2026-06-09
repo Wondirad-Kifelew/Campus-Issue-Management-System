@@ -29,7 +29,8 @@ export default function NotificationsPage() {
       <div className="bg-white rounded-lg shadow border border-slate-200">
         {notifications.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-slate-600">No notifications yet</p>
+            <p className="text-slate-600">No notifications yet 
+              <button onClick={() => window.location.reload()} className="text-blue-500 hover:text-blue-700">Reload</button></p>
           </div>
         ) : (
           <div className="max-h-96 overflow-y-auto divide-y divide-slate-200">

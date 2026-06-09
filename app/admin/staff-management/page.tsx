@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, X } from 'lucide-react';
-import { useAdmin } from '@/lib/context';
+import { useAdmin, useIssue } from '@/lib/context';
 import { User } from '@/lib/types';
-
-const VALID_CATEGORIES = ['Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others'];
 
 export default function StaffManagement() {
   const { users, isLoadingUsers, fetchUsers, addUser, updateUser, deleteUser } = useAdmin();
+  const { categories } = useIssue();
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -142,9 +141,10 @@ export default function StaffManagement() {
                     <td className="px-6 py-4 text-sm space-x-2 flex">
                       <button
                         onClick={() => handleEditStaff(staff)}
-                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
+                        className="inline-flex items-center gap-1  px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
                       >
-                        Edit
+                      <Edit2 className="w-3 h-3" />
+                         Edit
                       </button>
                       <button
                         onClick={() => handleToggleStatus(staff)}
@@ -196,9 +196,9 @@ export default function StaffManagement() {
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select a category</option>
-                  {VALID_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
                     </option>
                   ))}
                 </select>
@@ -268,9 +268,9 @@ export default function StaffManagement() {
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select a category</option>
-                  {VALID_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
                     </option>
                   ))}
                 </select>

@@ -6,20 +6,11 @@ import { IssueCategory } from '@/lib/types';
 import { IssueGrid } from '@/components/student/IssueGrid';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const CATEGORIES: IssueCategory[] = [
-  'Infrastructure',
-  'Cleanliness',
-  'Technology',
-  'Safety',
-  'Cafeteria',
-  'Others',
-];
-
 const ITEMS_PER_PAGE = 6;
 
 export default function AllIssuesPage() {
   // const { user } = useIssue();
-  const { issues, agreeWithIssue } = useIssue();
+  const { issues, agreeWithIssue, categories } = useIssue();
   const authUser = useAuth().user;
 
   const [selectedCategory, setSelectedCategory] = useState<IssueCategory | 'All'>('All');
@@ -106,9 +97,9 @@ export default function AllIssuesPage() {
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="All">All Categories</option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
                 </option>
               ))}
             </select>

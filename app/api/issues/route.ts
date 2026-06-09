@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/db';
 import Issue from '@/lib/models/Issue';
 import Notification from '@/lib/models/Notification';
 import { enforceRole, verifyToken } from '@/lib/middleware/auth';
+import { getValidCategoryNames } from '@/lib/categories';
 import type { IssueCategory, IssueStatus } from '@/lib/types';
 
 const URGENCY_THRESHOLD = 10;
@@ -64,14 +65,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const validCategories: IssueCategory[] = [
-    'Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others',
-  ];
+  await connectDB();
+
+  const validCategories = await getValidCategoryNames();
   if (!validCategories.includes(category)) {
     return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
   }
-
-  await connectDB();
 
   const issue = await Issue.create({
     title:         title.trim(),

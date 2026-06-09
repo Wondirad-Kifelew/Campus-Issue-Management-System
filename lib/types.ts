@@ -54,8 +54,8 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
-  createdBy: string; 
-  createdAt: string;
+  createdBy?: string;
+  createdAt?: string;
 }
 
 export interface AuthContextType {
@@ -70,7 +70,9 @@ export interface IssueContextType {
   issues: Issue[];
   notifications: Notification[];
   categories: Category[];
-  addCategory: (name: string, description?: string) => void;
+  addCategory: (name: string, description?: string) => Promise<void>;
+  updateCategory: (id: string, updates: { name?: string; description?: string }) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
   addIssue: (issue: Omit<Issue, 'id' | 'agreementCount' | 'agreedBy'>) => void;
   updateIssue: (id: string, updates: Partial<Issue>) => void;
   deleteIssue: (id: string) => void;

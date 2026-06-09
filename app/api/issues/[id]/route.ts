@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/db';
 import Issue from '@/lib/models/Issue';
 import Notification from '@/lib/models/Notification';
 import { enforceRole, verifyToken } from '@/lib/middleware/auth';
+import { getValidCategoryNames } from '@/lib/categories';
 import type { IssueCategory } from '@/lib/types';
 
 // type Params = { params: { id: string } };
@@ -71,13 +72,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       );
     }
 
-    const validCategories: IssueCategory[] = [
-      'Infrastructure', 'Cleanliness', 'Technology', 'Safety', 'Cafeteria', 'Others',
-    ];
-
     if (body.title !== undefined)       issue.title       = body.title.trim();
     if (body.description !== undefined) issue.description = body.description.trim();
     if (body.category !== undefined) {
+      const validCategories = await getValidCategoryNames();
       if (!validCategories.includes(body.category)) {
         return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
       }

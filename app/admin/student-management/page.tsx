@@ -122,9 +122,10 @@ export default function StudentManagement() {
                     <td className="px-6 py-4 text-sm space-x-2 flex">
                       <button
                         onClick={() => handleEdit(student)}
-                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
+                        className="inline-flex items-center gap-1  px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors"
                       >
-                        Edit
+                        <Edit2 className="w-3 h-3" />
+                         Edit
                       </button>
                       <button
                         onClick={() => handleToggleStatus(student)}
