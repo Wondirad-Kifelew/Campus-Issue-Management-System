@@ -145,9 +145,9 @@ export function RoleSelector() {
           </div>
 
           {/* footer */}
-          <p className="mt-12 text-center text-xs" style={{ color: '#d1d5db' }}>
+          {/* <p className="mt-12 text-center text-xs" style={{ color: '#d1d5db' }}>
             © {new Date().getFullYear()} Addis Ababa University · All rights reserved
-          </p>
+          </p> */}
         </div>
       </div>
 

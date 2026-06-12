@@ -55,6 +55,8 @@ export function RegisterForm() {
     try {
       if (!fullName || !userId || !password || !confirmPassword)
         throw new Error('Please fill in all fields');
+      if (!/^[a-zA-Z]{3}\/\d{4}\/\d{2}$/.test(userId))
+        throw new Error('Student ID must be in the format ABC/1234/56');
       if (password.length < 6)
         throw new Error('Password must be at least 6 characters');
       if (password !== confirmPassword)
@@ -248,9 +250,9 @@ export function RegisterForm() {
             </Link>
           </p>
 
-          <p className="mt-10 text-center text-xs" style={{ color: '#d1d5db' }}>
+          {/* <p className="mt-10 text-center text-xs" style={{ color: '#d1d5db' }}>
             © {new Date().getFullYear()} Addis Ababa University · All rights reserved
-          </p>
+          </p> */}
         </div>
       </div>
 

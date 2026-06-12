@@ -163,6 +163,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
 
   // [INTEGRATED] Fetch issues from API on mount
   useEffect(() => {
+    if (!isAuthenticated) return; 
     const fetchIssues = async () => {
       setIsLoadingIssues(true);
       try {
@@ -191,12 +192,13 @@ export function IssueProvider({ children }: { children: ReactNode }) {
 
   // [INTEGRATED] Fetch notifications from API on mount
   useEffect(() => {
+    if (!isAuthenticated) return; 
     const fetchNotifications = async () => {
       setIsLoadingNotifications(true);
       try {
-        console.log('Fetching notifications from API...'); // Debug log to check if API call is made
+        
         const response = await fetch('/api/notifications', { credentials: 'include' });
-        console.log('API response for notifications:(in context)', response);
+        
         if (response.ok) {
           const data = await response.json();
           
@@ -220,6 +222,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
 
   // [INTEGRATED] Fetch categories from API on mount
   useEffect(() => {
+    if (!isAuthenticated) return; 
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/categories', { credentials: 'include' });
@@ -396,22 +399,22 @@ export function IssueProvider({ children }: { children: ReactNode }) {
   // [INTEGRATED] Call /api/issues/:id/agree to toggle agreement
   const agreeWithIssue = useCallback(async (issueId: string, studentId: string) => {
     try {
-      console.log('Agreeing with issue:(inContext)', issueId, 'by student:', studentId);
+      
       const response = await fetch(`/api/issues/${issueId}/agree`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ studentId }),
         credentials: 'include',
       });
-      console.log('API response for agree:(in context)', response);
+      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to agree with issue');
       }
 
       const data = await response.json();
-      console.log('Data from agree API:(in context)', data);
-      // console.log('Normalized issue after agree:(in context)', normalizeIssue(data.issue));
+      
+      
       setIssues((prev) =>
         prev.map((issue) => (issue.id === issueId ? data.issue : issue))
       );
@@ -495,13 +498,15 @@ export function IssueProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ response }),
         credentials: 'include',
       });
+      console.log("response from api??: , res")
 
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to add response');
       }
-
+      
       const data = await res.json();
+      console.log("response added on 1st try??: , data")
       setIssues((prev) =>
         prev.map((issue) => (issue.id === issueId ? data.issue: issue))
       );
@@ -616,11 +621,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       const response = await fetch(url, { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
-        // console.log('Fetched users data:(in context)', data.users);
-
+        
         setUsers(data.users?.map(normalizeUser) || []);
-        // console.log('Normalized users set in context:', data.users?.map(normalizeUser) || []); 
-        // setUsers(data.users || []);
+    
       }
     } catch (error) {
       console.error('[v0] Error fetching users:', error);
@@ -667,7 +670,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const updateUser = useCallback(async (id: string, updates: any) => {
     try {
-      console.log('Updating user ID(in context):', id, 'with updates:', updates); // Debug log to check update data
+      
       const response = await fetch(`/api/users/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

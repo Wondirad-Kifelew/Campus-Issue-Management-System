@@ -38,7 +38,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
 
   const body = await request.json();
-console.log('Received update for user ID:', id, 'with body:', body); // Debug log to check incoming data
+
   if (body.name !== undefined)   user.name   = body.name.trim();
   if (body.userId !== undefined) user.userId = body.userId.trim();
 

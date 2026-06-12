@@ -22,8 +22,7 @@ export default function StudentManagement() {
   }, [fetchUsers]);
 
   const students = users.filter(u => u.role === 'student');
-// console.log('Fetched users:', users); // Debug log to check fetched students
-// console.log("sample status of first student:", students[0]?.status); // Debug log to check status field of students
+
   const handleEdit = (student: User) => {
 
     setEditingId(student.userId);

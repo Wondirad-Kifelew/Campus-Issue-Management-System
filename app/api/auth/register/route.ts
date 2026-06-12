@@ -28,6 +28,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
     }
 
+    if (role === 'student' && !/^[a-zA-Z]{3}\/\d{4}\/\d{2}$/.test(userId)){
+      return NextResponse.json(
+        { error: 'Student ID must be in the format ABC/1234/56' },
+        { status: 400 }
+      );
+    }
     if (password.length < 6) {
       return NextResponse.json(
         { error: 'Password must be at least 6 characters' },

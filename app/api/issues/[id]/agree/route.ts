@@ -12,15 +12,15 @@ type Params = { params: { id: string } };
 export async function POST(request: NextRequest, context:any) {
   const params = await context.params;
   const id = params.id;
-  console.log('id from context:', id);
+  
  
   const auth = enforceRole(request, ['student']);
   if (auth instanceof NextResponse) return auth;
 
   await connectDB();
-  console.log('Connected to DB, looking for issue with id:', id);
+  
   const issue = await Issue.findById(id);
-  console.log('Issue found:', issue, 'id:', id); // params.id is undefined
+  
   if (!issue) {
     return NextResponse.json({ error: 'Issue not found' }, { status: 404 });
   }

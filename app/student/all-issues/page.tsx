@@ -59,7 +59,7 @@ export default function AllIssuesPage() {
 
   // [INTEGRATED] Call API to toggle agreement
   const handleAgree = async (issueId: string) => {
-    console.log('Handling agree for issue(inhandleAgree):', issueId, 'by user:', authUser?.userId);
+    
     if (authUser?.userId) {
       await agreeWithIssue(issueId, authUser.userId);
       window.location.reload();

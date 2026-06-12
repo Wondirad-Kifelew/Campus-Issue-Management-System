@@ -12,7 +12,7 @@ export default function NotificationsPage() {
 
   const handleViewReply = async (notification: Notification) => {
     setSelectedNotification(notification);
-    console.log("Viewing reply for notification:", notification);
+    
     await markNotificationAsRead(notification.id);
   };
 

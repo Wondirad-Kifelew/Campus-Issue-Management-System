@@ -55,6 +55,9 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       if (!userId || !password) throw new Error('Please fill in all fields');
+        if(role === 'student' && !/^[a-zA-Z]{3}\/\d{4}\/\d{2}$/.test(userId)){
+            throw new Error('Student ID must be in the format ABC/1234/56');
+        }
       if (password.length < 6) throw new Error('Password must be at least 6 characters');
       
       // [INTEGRATED] Call API login instead of mock - shows spinner during request
@@ -267,7 +270,7 @@ export function LoginForm() {
           {/* register */}
           <p className="text-center mt-8 text-sm" style={{ color: '#6b7280' }}>
             {
-              role === 'admin' ? 
+              role === 'admin' || role === 'staff' ? 
               "" : (
                 <>
               Don't have an account?{" "}
@@ -286,9 +289,9 @@ export function LoginForm() {
             
           </p>
 
-          <p className="mt-10 text-center text-xs" style={{ color: '#d1d5db' }}>
+          {/* <p className="mt-10 text-center text-xs" style={{ color: '#d1d5db' }}>
             © {new Date().getFullYear()} Addis Ababa University · All rights reserved
-          </p>
+          </p> */}
         </div>
       </div>
 

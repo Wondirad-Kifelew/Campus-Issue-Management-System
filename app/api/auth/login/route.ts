@@ -15,7 +15,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
+     if (role === 'student' && !/^[a-zA-Z]{3}\/\d{4}\/\d{2}$/.test(userId)){
+      return NextResponse.json(
+        { error: 'Student ID must be in the format ABC/1234/56' },
+        { status: 400 }
+      );
+    }
     await connectDB();
 
     const user = await User.findOne({ userId, role });
