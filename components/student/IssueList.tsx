@@ -53,7 +53,7 @@ export function IssueList({ issues, onEdit, onDelete, onView }: IssueListProps) 
             </div>
 
             <div className="flex items-center gap-2 ml-4">
-              {onEdit && (
+              {issue.status === 'Pending' && onEdit && (
                 <button
                   onClick={() => onEdit(issue)}
                   className="p-2 text-slate-600 hover:text-blue-600 transition-colors"
@@ -62,7 +62,7 @@ export function IssueList({ issues, onEdit, onDelete, onView }: IssueListProps) 
                   <Edit className="w-5 h-5" />
                 </button>
               )}
-              {onDelete && (
+              {issue.status === 'Pending' && onDelete && (
                 <button
                   onClick={() => {
                     if (confirm('Are you sure you want to delete this issue?')) {
@@ -75,7 +75,7 @@ export function IssueList({ issues, onEdit, onDelete, onView }: IssueListProps) 
                   <Trash2 className="w-5 h-5" />
                 </button>
               )}
-              {onView && (
+              {/* {onView && (
                 <button
                   onClick={() => onView(issue)}
                   className="p-2 text-slate-600 hover:text-slate-900 transition-colors"
@@ -83,7 +83,7 @@ export function IssueList({ issues, onEdit, onDelete, onView }: IssueListProps) 
                 >
                   <Eye className="w-5 h-5" />
                 </button>
-              )}
+              )} */}
             </div>
           </div>
         </div>
