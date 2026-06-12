@@ -48,6 +48,9 @@ export function enforceRole(
     );
   }
 
+  // role that is passed from the front end
+console.log("allowed roles: ", allowedRoles)
+console.log("payload roles: ", payload.role)
   if (!allowedRoles.includes(payload.role)) {
     return NextResponse.json(
       { error: `Forbidden — requires one of: ${allowedRoles.join(', ')}` },

@@ -1,7 +1,7 @@
 'use client';
 
 import { Issue } from '@/lib/types';
-import { Eye, ThumbsUp } from 'lucide-react';
+import { Eye, ThumbsUp, Handshake } from 'lucide-react';
 
 interface IssueGridProps {
   issues: Issue[];
@@ -70,7 +70,7 @@ export function IssueGrid({
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <ThumbsUp className="w-4 h-4" />
+              <Handshake className="w-4 h-4" /> Agree
               <span className="text-sm font-medium">{issue?.agreementCount}</span>
             </button>
 

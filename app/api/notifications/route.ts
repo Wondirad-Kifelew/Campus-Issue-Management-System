@@ -8,7 +8,7 @@ import { enforceRole } from '@/lib/middleware/auth';
 // Returns notifications belonging to the authenticated student
 export async function GET(request: NextRequest) {
   
-  const auth = enforceRole(request, ['student']);
+  const auth = enforceRole(request, ['student', 'staff']);
   
   if (auth instanceof NextResponse) return auth;
   await connectDB();
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 // PATCH /api/notifications — mark all non-reply notifications as read
 export async function PATCH(request: NextRequest) {
   const auth = enforceRole(request, ['student']);
-console.log('Auth:', auth);
+
   if (auth instanceof NextResponse) return auth;
 
   await connectDB();

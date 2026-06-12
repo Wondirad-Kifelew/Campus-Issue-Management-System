@@ -153,6 +153,7 @@ const normalizeCategory = (category: any): Category => {
   };
 };
 export function IssueProvider({ children }: { children: ReactNode }) {
+   const { isAuthenticated } = useAuth(); 
   const [issues, setIssues] = useState<Issue[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -186,7 +187,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     };
 
     fetchIssues();
-  }, [pathname]);
+  }, [isAuthenticated, pathname]);
 
   // [INTEGRATED] Fetch notifications from API on mount
   useEffect(() => {
@@ -215,7 +216,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     };
 
     fetchNotifications();
-  }, []);
+  }, [isAuthenticated]);
 
   // [INTEGRATED] Fetch categories from API on mount
   useEffect(() => {
@@ -236,7 +237,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     };
 
     fetchCategories();
-  }, []);
+  }, [isAuthenticated]);
 
   // [INTEGRATED] Call /api/categories POST to create a new category
   const addCategory = useCallback(async (name: string, description?: string) => {
@@ -532,7 +533,7 @@ export function IssueProvider({ children }: { children: ReactNode }) {
       }}
     >
       {/* Show loading spinner while fetching initial data */}
-      {isLoadingIssues && isLoadingNotifications ? (
+      {isLoadingIssues || isLoadingNotifications ? (
         <div className="flex items-center justify-center h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
