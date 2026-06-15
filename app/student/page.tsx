@@ -34,9 +34,9 @@ export default function StudentDashboard() {
           </div>
 
           {/* My Issues Card */}
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
             <div className="mb-3">
-              <ClipboardList className="w-8 h-8 text-purple-500" />
+              <ClipboardList className="w-8 h-8 text-blue-500" />
             </div>
             <h2 className="text-xl font-semibold text-slate-900 mb-2">My Issues</h2>
             <p className="text-slate-700 mb-4">
@@ -48,9 +48,9 @@ export default function StudentDashboard() {
           </div>
 
           {/* All Issues Card */}
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
             <div className="mb-3">
-              <Globe className="w-8 h-8 text-green-500" />
+              <Globe className="w-8 h-8 text-blue-500" />
             </div>
             <h2 className="text-xl font-semibold text-slate-900 mb-2">All Issues</h2>
             <p className="text-slate-700 mb-4">
@@ -62,9 +62,9 @@ export default function StudentDashboard() {
           </div>
 
           {/* Notifications Card */}
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-6 border border-orange-200">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
             <div className="mb-3">
-              <Bell className="w-8 h-8 text-orange-500" />
+              <Bell className="w-8 h-8 text-blue-500" />
             </div>
             <h2 className="text-xl font-semibold text-slate-900 mb-2">Notifications</h2>
             <p className="text-slate-700 mb-4">

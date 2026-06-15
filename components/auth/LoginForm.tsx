@@ -107,7 +107,7 @@ export function LoginForm() {
           >
             <Image
               src="/cropped_logo.png"
-              alt="Addis Ababa University logo"
+              alt="Resolv logo"
               width={144}
               height={144}
               className="rounded-full object-contain"
@@ -119,10 +119,10 @@ export function LoginForm() {
         {/* wordmark */}
         <div className="relative z-10 text-center space-y-2">
           <p
-            className="tracking-widest text-xs font-semibold uppercase"
+            className="tracking-widest text-l font-semibold uppercase"
             style={{ color: '#F5C518', fontFamily: "'Georgia', serif", letterSpacing: '0.2em' }}
           >
-            Addis Ababa University
+            Resolv
           </p>
           <h1
             className="text-3xl md:text-4xl font-bold text-white leading-tight"
@@ -289,9 +289,7 @@ export function LoginForm() {
             
           </p>
 
-          {/* <p className="mt-10 text-center text-xs" style={{ color: '#d1d5db' }}>
-            © {new Date().getFullYear()} Addis Ababa University · All rights reserved
-          </p> */}
+          
         </div>
       </div>
 

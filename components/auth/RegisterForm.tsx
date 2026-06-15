@@ -111,15 +111,15 @@ export function RegisterForm() {
         <div className="relative z-10 mb-8 drop-shadow-2xl">
           <div className="rounded-full p-3"
             style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(4px)', border: '2px solid rgba(255,255,255,0.25)' }}>
-            <Image src="/cropped_logo.png" alt="Addis Ababa University logo"
+            <Image src="/cropped_logo.png" alt="Resolv logo"
               width={144} height={144} className="rounded-full object-contain" priority />
           </div>
         </div>
 
         <div className="relative z-10 text-center space-y-2">
-          <p className="tracking-widest text-xs font-semibold uppercase"
+          <p className="tracking-widest text-l font-semibold uppercase"
             style={{ color: '#F5C518', fontFamily: "'Georgia', serif", letterSpacing: '0.2em' }}>
-            Addis Ababa University
+            Resolv
           </p>
           <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight"
             style={{ fontFamily: "'Georgia', serif", textShadow: '0 2px 12px rgba(0,0,0,0.35)' }}>
@@ -250,9 +250,7 @@ export function RegisterForm() {
             </Link>
           </p>
 
-          {/* <p className="mt-10 text-center text-xs" style={{ color: '#d1d5db' }}>
-            © {new Date().getFullYear()} Addis Ababa University · All rights reserved
-          </p> */}
+          
         </div>
       </div>
 

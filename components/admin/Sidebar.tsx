@@ -37,11 +37,11 @@ export function Sidebar({ onClose }: SidebarProps) {
       <div className="p-4 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
+            <span className="text-white font-bold text-sm">R</span>
           </div>
           <div>
             <h1 className="text-xs font-bold text-slate-900 leading-tight">
-              AAU Students Issue
+              Resolv Students Issue
             </h1>
             <p className="text-xs text-slate-600">Admin Portal</p>
           </div>

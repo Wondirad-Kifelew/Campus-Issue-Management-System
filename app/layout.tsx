@@ -3,7 +3,7 @@ import './globals.css'
 import { ProviderWrapper } from '@/components/providers'
 
 export const metadata = {
-  title: 'AAU Students Issue Management',
+  title: 'Resolv',
   description: 'Student portal for campus issue reporting and tracking',
 }
 

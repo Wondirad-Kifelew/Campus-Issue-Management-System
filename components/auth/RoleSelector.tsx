@@ -54,7 +54,7 @@ export function RoleSelector() {
           >
             <Image
               src="/cropped_logo.png"
-              alt="Addis Ababa University logo"
+              alt="Resolv logo"
               width={144}
               height={144}
               className="rounded-full object-contain"
@@ -66,10 +66,10 @@ export function RoleSelector() {
         {/* wordmark */}
         <div className="relative z-10 text-center space-y-2">
           <p
-            className="tracking-[0.22em] text-xs font-semibold uppercase"
+            className="tracking-[0.22em] text-l font-semibold uppercase"
             style={{ color: '#F5C518', fontFamily: "'Georgia', serif", letterSpacing: '0.2em' }}
           >
-            Addis Ababa University
+            Resolv
           </p>
           <h1
             className="text-3xl md:text-4xl font-bold text-white leading-tight"
@@ -145,9 +145,7 @@ export function RoleSelector() {
           </div>
 
           {/* footer */}
-          {/* <p className="mt-12 text-center text-xs" style={{ color: '#d1d5db' }}>
-            © {new Date().getFullYear()} Addis Ababa University · All rights reserved
-          </p> */}
+          
         </div>
       </div>
 

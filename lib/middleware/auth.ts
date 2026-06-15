@@ -23,7 +23,7 @@ export interface JWTPayload {
 export function verifyToken(request: NextRequest): JWTPayload | null {
   try {
     
-    const token = request.cookies.get('aau_token')?.value;
+    const token = request.cookies.get('Resolv_token')?.value;
     if (!token) return null;
     // [INTEGRATED] Use getJWTSecret() to get secret at runtime
     return jwt.verify(token, getJWTSecret()) as JWTPayload;
@@ -67,7 +67,7 @@ export function signToken(payload: JWTPayload): string {
 
 // Attaches the token as an httpOnly cookie on a response
 export function setTokenCookie(response: NextResponse, token: string): void {
-  response.cookies.set('aau_token', token, {
+  response.cookies.set('Resolv_token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -78,7 +78,7 @@ export function setTokenCookie(response: NextResponse, token: string): void {
 
 // Clears the token cookie on logout
 export function clearTokenCookie(response: NextResponse): void {
-  response.cookies.set('aau_token', '', {
+  response.cookies.set('Resolv_token', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
