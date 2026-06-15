@@ -4,7 +4,7 @@ A platform for managing and tracking issues on campus. Students can report probl
 
 ## Live Demo
 
-[View Live Application](your-deployment-link-here)
+[View Live Application](https://campus-issue-management-system-hh62.vercel.app/)
 
 ## Features
 
