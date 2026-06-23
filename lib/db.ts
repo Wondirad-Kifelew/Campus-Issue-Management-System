@@ -1,7 +1,5 @@
-import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-dotenv.config();
 
 // [INTEGRATED] Get MONGODB_URI at runtime instead of build time to support env vars
 function getMongoDBURI(): string {
