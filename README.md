@@ -87,7 +87,7 @@ You can run this project either with **Docker** or with a **local Node.js setup*
    JWT_SECRET=your_random_secret_key
    ```
    For MongoDB URI, use your connection string from MongoDB Atlas or local MongoDB instance.
-   For JWT_SECRET, generate a random string: `openssl rand -base64 32`
+   For JWT_SECRET, generate a random string.
 
 3. Run the development server
    ```bash
