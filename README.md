@@ -27,7 +27,16 @@ A platform for managing and tracking issues on campus. Students can report probl
 
 ## Getting Started
 
-## Running with Docker
+Clone the repository first:
+```bash
+git clone https://github.com/Wondirad-Kifelew/Campus-Issue-Management-System.git
+cd Campus-Issue-Management-System
+```
+
+You can run this project either with **Docker** or with a **local Node.js setup**.
+
+
+## Option 1: Run with Docker
 
 ### Prerequisites
 - Docker installed ([Get Docker](https://docs.docker.com/get-docker/))
@@ -59,41 +68,33 @@ A platform for managing and tracking issues on campus. Students can report probl
 
 5. Visit [http://localhost:3000](http://localhost:3000)
 
-### Prerequisites
+### Option 2: Run locally with Node.js
 
+**Prerequisites**
 - Node.js 18+
 - MongoDB connection
-- Environment variables configured
 
-### Installation
+**Setup**
 
-1. Clone the repository
-```bash
-git clone https://github.com/Wondirad-Kifelew/Campus-Issue-Management-System.git
-cd Campus-Issue-Management-System
-```
+1. Install dependencies
+   ```bash
+   npm install
+   ```
 
-2. Install dependencies
-```bash
-npm install
-```
+2. Create a `.env.local` file in the root directory
+   ```
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_random_secret_key
+   ```
+   For MongoDB URI, use your connection string from MongoDB Atlas or local MongoDB instance.
+   For JWT_SECRET, generate a random string: `openssl rand -base64 32`
 
-3. Configure environment variables
-Create a `.env.local` file in the root directory:
-```
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_random_secret_key
-```
+3. Run the development server
+   ```bash
+   npm run dev
+   ```
 
-For MongoDB URI, use your connection string from MongoDB Atlas or local MongoDB instance.
-For JWT_SECRET, generate a random string: `openssl rand -base64 32`
-
-4. Run the development server
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Testing the Live Demo
 
