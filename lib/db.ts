@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 // [INTEGRATED] Get MONGODB_URI at runtime instead of build time to support env vars
 function getMongoDBURI(): string {
-  console.log('MongoDB URI:'," ---- connected---"); // Debug log to check the value of MONGODB_URI
+  // console.log('MongoDB URI:'," ---- connected---"); // Debug log to check the value of MONGODB_URI
   const uri = process.env.MONGODB_URI;
   if (!uri) {
     throw new Error('MONGODB_URI is not defined. Please add it to your environment variables.');

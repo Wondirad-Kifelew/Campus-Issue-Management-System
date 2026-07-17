@@ -9,6 +9,8 @@ __v0_jsx-dev-runtime.ts
 # Environment variables
 .env*.local
 .env.local
+.env*.production
+.env.production
 
 # Common ignores
 node_modules
