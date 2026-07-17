@@ -2,9 +2,6 @@
 
 A platform for managing and tracking issues on campus. Students can report problems, staff can respond and track resolutions, and administrators have full oversight and management capabilities.
 
-## Running with Docker
-
-
 ## Live Demo
 
 [View Live Application](https://campus-issue-management-system-flax.vercel.app/)
@@ -39,26 +36,26 @@ A platform for managing and tracking issues on campus. Students can report probl
 ### Setup
 
 1. Clone the repository (skip if already done above)
-   \`\`\`bash
+   ```bash
    git clone https://github.com/Wondirad-Kifelew/Campus-Issue-Management-System.git
    cd Campus-Issue-Management-System
-   \`\`\`
+   ```
 
 2. Create your environment file from the example
-   \`\`\`bash
+   ```bash
    cp .env.example .env.production
-   \`\`\`
+   ```
    Then fill in your actual `MONGODB_URI` and `JWT_SECRET` values.
 
 3. Build the Docker image
-   \`\`\`bash
+   ```bash
    docker build -t cims .
-   \`\`\`
+   ```
 
 4. Run the container
-   \`\`\`bash
+   ```bash
    docker run -p 3000:3000 --env-file .env.production cims
-   \`\`\`
+   ```
 
 5. Visit [http://localhost:3000](http://localhost:3000)
 
