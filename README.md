@@ -41,12 +41,12 @@ A platform for managing and tracking issues on campus. Students can report probl
    cd Campus-Issue-Management-System
    ```
 
-2. Create your environment file from the example
-   ```bash
-   cp .env.example .env.production
+2. Create a `.env.production` file in the root directory
    ```
-   Then fill in your actual `MONGODB_URI` and `JWT_SECRET` values.
-
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_random_secret_key
+   ```
+   
 3. Build the Docker image
    ```bash
    docker build -t cims .
